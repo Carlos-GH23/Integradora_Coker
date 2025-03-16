@@ -1,4 +1,3 @@
-import './App.css'
 import { AnimatePresence } from 'framer-motion'
 import {BrowserRouter as Router, Routes, Route, useLocation} from 'react-router-dom';
 
@@ -7,7 +6,7 @@ import Login from './components/Login/Login.tsx'
 export const AnimatedRoutes = () => {
   const location = useLocation();
   return (
-    <AnimatePresence mode= "wait">
+    <AnimatePresence  mode= "wait">
       <Routes location={location} key={location.pathname}>
         <Route path="/" element={<Login />} />
         <Route path="/login" element={<Login/>}></Route>

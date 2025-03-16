@@ -5,8 +5,8 @@ import {BrowserRouter as Router} from 'react-router-dom';
 import { AnimatedRoutes } from './components/Routes'
 
 createRoot(document.getElementById('root')!).render(
-  <StrictMode>
-    <Router>
+  <StrictMode >
+    <Router >
       <AnimatedRoutes />
     </Router>
   </StrictMode>
