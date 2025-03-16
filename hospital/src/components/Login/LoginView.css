@@ -1,0 +1,6 @@
+@import "tailwindcss";
+
+.container {
+    display: flex;
+    width: 100vw;
+}
