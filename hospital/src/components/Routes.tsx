@@ -10,15 +10,14 @@ export const AnimatedRoutes = () => {
     console.log("location.pathname: ", location.pathname);
 
     return (
-        <div className="flex p-6">
-        <AnimatePresence mode= "wait"className="min-h-screen w-full flex">
-            {location.pathname !== "/" && location.pathname !== "/login"}
-            <Routes location={location} key={location.pathname}>
-                <Route path="/" element={<Login />} />
-                <Route path="/login" element={<Login/>}></Route>
-                <Route path="/nurses" element={<Nurses/>}></Route>
-            </Routes>
-        </AnimatePresence>
+        <div className={`flex ${location.pathname !== "/" ? "p-6" : ""}`}>
+            <AnimatePresence mode="wait" className="min-h-screen w-full flex">
+                <Routes location={location} key={location.pathname}>
+                    <Route path="/" element={<Login />} />
+                    <Route path="/login" element={<Login />} />
+                    <Route path="/nurses" element={<Nurses />} />
+                </Routes>
+            </AnimatePresence>
         </div>
     );
 }
