@@ -36,27 +36,10 @@ public class MainSecurity implements WebMvcConfigurer {
         http.csrf(csrf -> csrf.disable()).cors(cors -> cors.disable())
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(WHITE_LIST).permitAll()
-
-                        // Rutas para ADMIN
-                        .requestMatchers(
-                                "/api/users/create/**",
-                                "/api/floors/**",
-                                "/api/beds/**",
-                                "/api/patients/**"
-                        ).hasRole("ADMIN")
-
-                        // Rutas para SECRETARY
-                        .requestMatchers(
-                                "/api/nurses/**",
-                                "/api/beds/assign"
-                        ).hasRole("SECRETARY")
-
-                        // Rutas para NURSE
-                        .requestMatchers(
-                                "/api/beds/my-beds",
-                                "/api/patients/assign"
-                        ).hasRole("NURSE")
-
+                        .requestMatchers("/api/users/create/**").hasRole("ADMIN")
+                        .requestMatchers("/api/patients/**").hasRole("ADMIN")
+                        .requestMatchers("/api/users/all", "/api/users/{id}", "/api/users/{id}").hasRole("SECRETARY")
+                        .requestMatchers("/api/floors/**", "/api/beds/**").hasAnyRole("ADMIN", "SECRETARY")
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(authFilter, UsernamePasswordAuthenticationFilter.class);
