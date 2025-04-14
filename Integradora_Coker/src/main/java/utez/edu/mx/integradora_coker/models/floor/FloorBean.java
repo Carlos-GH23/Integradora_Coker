@@ -1,5 +1,6 @@
 package utez.edu.mx.integradora_coker.models.floor;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import utez.edu.mx.integradora_coker.models.Bed.BedBean;
 import utez.edu.mx.integradora_coker.models.user.UserBean;
@@ -17,9 +18,11 @@ public class FloorBean {
     private String identifier;
 
     @OneToMany(mappedBy = "floor")
+    @JsonIgnore
     private Set<UserBean> users;
 
     @OneToMany(mappedBy = "floor")
+    @JsonIgnore
     private Set<BedBean> beds;
 
     public FloorBean(Long id, String identifier, Set<UserBean> users, Set<BedBean> beds) {

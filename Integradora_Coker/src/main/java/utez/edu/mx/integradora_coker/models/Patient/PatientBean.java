@@ -1,6 +1,7 @@
 package utez.edu.mx.integradora_coker.models.Patient;
 
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import utez.edu.mx.integradora_coker.models.Bed.BedBean;
 
@@ -15,6 +16,7 @@ public class PatientBean {
 
     @OneToOne
     @JoinColumn(name = "bed_id")
+    @JsonIgnore
     private BedBean bed;
 
     public PatientBean(Long id, BedBean bed, String fullName) {

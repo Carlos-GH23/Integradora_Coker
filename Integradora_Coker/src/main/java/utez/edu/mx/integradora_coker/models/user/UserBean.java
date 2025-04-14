@@ -1,5 +1,6 @@
 package utez.edu.mx.integradora_coker.models.user;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import utez.edu.mx.integradora_coker.models.Bed.BedBean;
 import utez.edu.mx.integradora_coker.models.Role.RoleBean;
@@ -29,13 +30,16 @@ public class UserBean{
 
     @ManyToOne
     @JoinColumn(name = "floor_id")
+    @JsonIgnore
     private FloorBean floor;
 
     @ManyToOne
     @JoinColumn(name = "role_id")
+    @JsonIgnore
     private RoleBean role;
 
     @OneToMany(mappedBy = "user")
+    @JsonIgnore
     private Set<BedBean> beds;
 
     public UserBean(Long id, String fullName, String email, String phoneNumber, String username, String password, FloorBean floor, RoleBean role, Set<BedBean> beds) {

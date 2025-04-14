@@ -1,5 +1,6 @@
 package utez.edu.mx.integradora_coker.models.Role;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import utez.edu.mx.integradora_coker.models.user.UserBean;
 
@@ -15,6 +16,7 @@ public class RoleBean {
     private String name;
 
     @OneToMany(mappedBy = "role")
+    @JsonIgnore
     private Set<UserBean> users;
 
     public RoleBean(Long id, String name, Set<UserBean> users) {

@@ -1,5 +1,6 @@
 package utez.edu.mx.integradora_coker.models.Bed;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import utez.edu.mx.integradora_coker.models.Patient.PatientBean;
 import utez.edu.mx.integradora_coker.models.floor.FloorBean;
@@ -17,13 +18,16 @@ public class BedBean {
 
     @ManyToOne
     @JoinColumn(name = "floor_id")
+    @JsonIgnore
     private FloorBean floor;
 
     @ManyToOne
     @JoinColumn(name = "user_id")
+    @JsonIgnore
     private UserBean user;
 
     @OneToOne(mappedBy = "bed")
+    @JsonIgnore
     private PatientBean patient;
 
     public void setPatient(PatientBean patient) {
