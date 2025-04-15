@@ -3,7 +3,8 @@ import axios from 'axios';
 import { FaUser, FaEyeSlash, FaEye } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom'
 import hospitalBg from "../../assets/hospital.jpg";
-import ErrorMessage from '../General/ErrorMessage';
+import ErrorMessage from '../custom/ErrorMessage';
+import { login } from '../services/LoginServices';
 
 function Login() {
     const [username, setUsername] = useState<string>('');
@@ -17,20 +18,7 @@ function Login() {
         e.preventDefault();
         setError('');
         try {
-            const response = await axios.post<{ token: string }>('http://localhost:8080/api/auth/login', {
-                username,
-                password
-            });
-
-            console.log("Respuesta del servidor:", response.data);
-
-            if (response.status === 200) {
-                if (remember) {
-                    localStorage.setItem('user', JSON.stringify(response.data));
-                }
-                localStorage.setItem('token', response.data.token);
-                navigation('/nurses');
-            }
+            await login(username,password);
         } catch (error) {
             console.log('Error: ', error)
             setError('Usuario o contraseña incorrectos');

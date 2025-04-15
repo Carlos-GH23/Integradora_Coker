@@ -2,8 +2,8 @@ import { useState } from "react";
 import MenuTop from "../components/sidebar";
 import { Outlet } from "react-router-dom";
 
-function Nurses() {
-    const [user, setUser] = useState("nurse");
+function Secretary() {
+    const [user, setUser] = useState("secretary");
     return (
         <>
             <div className="flex w-screen">
@@ -18,4 +18,4 @@ function Nurses() {
     );
 }
 
-export default Nurses;
+export default Secretary;

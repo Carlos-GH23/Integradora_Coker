@@ -1,7 +1,7 @@
 import { AnimatePresence } from 'framer-motion'
 import {BrowserRouter as Router, Routes, Route, useLocation} from 'react-router-dom';
 
-import Login from './components/Login/Login.tsx'
+import Login from './components/auth/Login.tsx'
 
 export const AnimatedRoutes = () => {
   const location = useLocation();
