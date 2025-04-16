@@ -12,8 +12,8 @@ import ModalForm from '../custom/ModalForm';
 DataTable.use(DT);
 const ListSecretary = () => {
 
-    const [formData, setFormData] = useState<User>({ id: 0, fullName: "", email: "", phoneNumber: "", username: "", password: "" });
-    const [errors, setErrors] = useState<{ fullName?: string; email?: string; phoneNumber?: string; username?: string; password?: string }>({});
+    const [formData, setFormData] = useState<User>({ id: 0, fullName: "", email: "", phoneNumber: "", username: "", password: "", floor: "" });
+    const [errors, setErrors] = useState<{ fullName?: string; email?: string; phoneNumber?: string; username?: string; password?: string; floor?: string }>({});
 
     const [viewModalForm, setViewModalForm] = useState(false);
     const isEdit = formData.id !== 0;
@@ -166,7 +166,7 @@ const ListSecretary = () => {
 
             <button className="fixed bottom-6 right-6 bg-green-600 text-white p-4 rounded-full shadow-lg hover:bg-green-700 transition"
                 onClick={() => {
-                    setFormData({ id: 0, fullName: "", email: "", phoneNumber: "", username: "", password: "" });
+                    setFormData({ id: 0, fullName: "", email: "", phoneNumber: "", username: "", password: "", floor: "" });
                     toggleModalForm();
                 }}
             >
@@ -211,6 +211,16 @@ const ListSecretary = () => {
                                 className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-400"
                             />
                             {errors.phoneNumber && <p className="text-red-500 text-sm">{errors.phoneNumber}</p>}
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium">Piso</label>
+                            <input
+                                type="text"
+                                value={formData.floor}
+                                onChange={(e) => handleChange("floor", e.target.value)}
+                                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-400"
+                            />
+                            {errors.floor && <p className="text-red-500 text-sm">{errors.floor}</p>}
                         </div>
                         <div>
                             <label className="block text-sm font-medium">Correo</label>

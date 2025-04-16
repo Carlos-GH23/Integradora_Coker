@@ -11,6 +11,7 @@ import Admin from '../admin/admin';
 import Secretary from '../secretary/Secretary';
 import ListNurses from '../components/table-nurses';
 import ListSecretary from '../components/table-secretary';
+import ListFloor from '../components/table-floors';
 
 export const AnimatedRoutes = () => {
     const location = useLocation();
@@ -33,14 +34,14 @@ export const AnimatedRoutes = () => {
                     <Route path='' />
                     <Route path='enfermeras' element={<ListNurses/>}/>
                     <Route path='secretarias' element={<ListSecretary/>}/>
-                    <Route path='pisos' />
+                    <Route path='pisos' element={<ListFloor/>} />
                 </Route>
                 )}
 
                 {secretary && loggedIn && (
                 <Route path='/secretaria' element={<Secretary/>}>
                     <Route path='' />
-                    <Route path='enfermeras' />
+                    <Route path='enfermeras' element={<ListNurses/>}/>
                     <Route path='camas' />                
                 </Route>
                 )}

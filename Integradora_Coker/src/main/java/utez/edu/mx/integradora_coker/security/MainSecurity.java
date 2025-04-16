@@ -42,7 +42,7 @@ public class MainSecurity implements WebMvcConfigurer {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(WHITE_LIST).permitAll()
                         .requestMatchers("/api/users/create/**").hasRole("ADMIN")
-                        .requestMatchers("/api/patients/**").hasRole("ADMIN")
+                        .requestMatchers("/api/patients/**").hasAnyRole("ADMIN","NURSE")
                         .requestMatchers("/api/users/all", "/api/users/{id}", "/api/users/{id}").hasAnyRole("ADMIN","SECRETARY")
                         .requestMatchers("/api/floors/**", "/api/beds/**").hasAnyRole("ADMIN", "SECRETARY")
                         .anyRequest().authenticated()

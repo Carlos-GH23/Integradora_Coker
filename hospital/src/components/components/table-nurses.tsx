@@ -9,11 +9,12 @@ import ErrorMessage from '../custom/ErrorMessage';
 import AlertMessage from '../custom/AlertMessage';
 import ModalForm from '../custom/ModalForm';
 import SuccessMessage from '../custom/SuccessMessage';
+import { isAdmin } from '../services/LoginServices';
 
 DataTable.use(DT);
 const ListNurses = () => {
-    const [formData, setFormData] = useState<User>({ id: 0, fullName: "", email: "", phoneNumber: "", username: "", password: "" });
-    const [errors, setErrors] = useState<{ fullName?: string; email?: string; phoneNumber?: string; username?: string; password?: string }>({});
+    const [formData, setFormData] = useState<User>({ id: 0, fullName: "", email: "", phoneNumber: "", username: "", password: "", floor: "" });
+    const [errors, setErrors] = useState<{ fullName?: string; email?: string; phoneNumber?: string; username?: string; password?: string; floor?: string }>({});
     const [nurses, setNurses] = useState<User[]>([]);
     const Service = new AdminServices<User>();
 
@@ -148,19 +149,21 @@ const ListNurses = () => {
                                 </td>
                                 <td className="px-6 py-4">{nurse.username}</td>
 
-                                <td className="px-6 py-4 flex space-x-2">
-                                    <button className="w-10 h-10 flex items-center justify-center bg-blue-500 text-white rounded-full hover:bg-blue-600 transition cursor-pointer"
-                                        onClick={() => { setFormData(nurse); toggleModalForm(); }}
-                                    >
-                                        <FaPen size={18} />
-                                    </button>
-                                    <button
-                                        className="w-10 h-10 flex items-center justify-center bg-red-500 text-white rounded-full hover:bg-red-700 transition cursor-pointer"
-                                        onClick={() => handleDelete(nurse)}
-                                    >
-                                        <FaTrash size={18} />
-                                    </button>
-                                </td>
+                                {isAdmin() && (
+                                    <td className="px-6 py-4 flex space-x-2">
+                                        <button className="w-10 h-10 flex items-center justify-center bg-blue-500 text-white rounded-full hover:bg-blue-600 transition cursor-pointer"
+                                            onClick={() => { setFormData(nurse); toggleModalForm(); }}
+                                        >
+                                            <FaPen size={18} />
+                                        </button>
+                                        <button
+                                            className="w-10 h-10 flex items-center justify-center bg-red-500 text-white rounded-full hover:bg-red-700 transition cursor-pointer"
+                                            onClick={() => handleDelete(nurse)}
+                                        >
+                                            <FaTrash size={18} />
+                                        </button>
+                                    </td>
+                                )}
 
                             </tr>
                         ))}
@@ -168,14 +171,16 @@ const ListNurses = () => {
                 </DataTable>
             </div>
 
-            <button className="fixed bottom-6 right-6 bg-green-600 text-white p-4 rounded-full shadow-lg hover:bg-green-700 transition"
-                onClick={() => {
-                    setFormData({ id: 0, fullName: "", email: "", phoneNumber: "", username: "", password: "" });
-                    toggleModalForm();
-                }}
-            >
-                <FaPlus size={24} />
-            </button>
+            {isAdmin() && (
+                <button className="fixed bottom-6 right-6 bg-green-600 text-white p-4 rounded-full shadow-lg hover:bg-green-700 transition"
+                    onClick={() => {
+                        setFormData({ id: 0, fullName: "", email: "", phoneNumber: "", username: "", password: "", floor: "" });
+                        toggleModalForm();
+                    }}
+                >
+                    <FaPlus size={24} />
+                </button>
+            )}
 
             <ModalForm
                 isOpen={viewModalForm}
@@ -217,6 +222,16 @@ const ListNurses = () => {
                             {errors.phoneNumber && <p className="text-red-500 text-sm">{errors.phoneNumber}</p>}
                         </div>
                         <div>
+                            <label className="block text-sm font-medium">Piso</label>
+                            <input
+                                type="text"
+                                value={formData.floor}
+                                onChange={(e) => handleChange("floor", e.target.value)}
+                                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-400"
+                            />
+                            {errors.floor && <p className="text-red-500 text-sm">{errors.floor}</p>}
+                        </div>
+                        <div>
                             <label className="block text-sm font-medium">Correo</label>
                             <input
                                 type="text"
@@ -254,7 +269,7 @@ const ListNurses = () => {
 
             {/* ErrorMessage */}
             {errorMessage && <ErrorMessage message={errorMessage} />}
-            
+
             {/* SuccessMessage */}
             {successMessage && <SuccessMessage message={successMessage} />}
 

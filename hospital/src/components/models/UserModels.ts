@@ -5,7 +5,14 @@ export interface User {
     phoneNumber: string;
     username: string;
     password: string;
+    floor:string;
 }
+
+export interface Floor {
+    id: number;
+    identifier: string;
+  }
+  
 
 export interface ApiResponse {
     data: User[];

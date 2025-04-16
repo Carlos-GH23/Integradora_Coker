@@ -40,9 +40,9 @@ function MenuTop({ user }: { user: string }) {
     ]
 
     const secretary = [
-        { name: "Inicio", path: "inicio", icon: <AiFillHome size={30} /> },
-        { name: "Enfermeras", path: "", icon: <FaUserNurse size={30} /> },
-        { name: "Camas", path: "", icon: <IoBedSharp size={30} /> },
+        { name: "Inicio", path: "", icon: <AiFillHome size={30} /> },
+        { name: "Enfermeras", path: "enfermeras", icon: <FaUserNurse size={30} /> },
+        { name: "Camas", path: "camas", icon: <IoBedSharp size={30} /> },
     ]
 
     const admin = [

@@ -1,7 +1,7 @@
 import axios from "axios";
-import { User } from "../models/UserModels";
+import { Floor, User } from "../models/UserModels";
 
-
+const API = "http://localhost:8080/api/floors"
 const API_URL = "http://localhost:8080/api/users/" 
 
 export class AdminServices<T> {
@@ -86,6 +86,42 @@ export class AdminServices<T> {
     async updateSecretary(id: number, data: Partial<T>): Promise<T> {
         try {
             return axios.put(`${API_URL}${id}`,data, this.getHeaders()).then(res => res.data);
+        } catch (error) {
+            console.error("Error al obtener los datos:", error);
+            throw error;
+        }
+    }
+
+    async getAllFloor(): Promise<{data: Floor[]}> {
+        try {
+            return axios.get<{ data: Floor[] }>(`${API}`, this.getHeaders()).then(res => res.data);
+        } catch (error) {
+            console.error("Error al obtener los datos:", error);
+            throw error;
+        }
+    }
+
+    async createFloor(data: T): Promise<T> {
+        try {
+            return axios.post(`${API}/create`,data, this.getHeaders()).then(res => res.data);
+        } catch (error) {
+            console.error("Error al obtener los datos:", error);
+            throw error;
+        }
+    }
+
+    async deleteFloor(id: number): Promise<void> {
+        try {
+            return axios.post(`${API}/delete${id}`, this.getHeaders()).then(res => res.data);
+        } catch (error) {
+            console.error("Error al obtener los datos:", error);
+            throw error;
+        }
+    }
+
+    async updateFloor(id: number, data: Partial<T>): Promise<T> {
+        try {
+            return axios.put(`${API}/edit/${id}`,data, this.getHeaders()).then(res => res.data);
         } catch (error) {
             console.error("Error al obtener los datos:", error);
             throw error;
