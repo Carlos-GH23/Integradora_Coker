@@ -9,6 +9,7 @@ interface AlertMessageProps {
     onCancel?: () => void;
     onConfirm?: () => void;
     colorConfirm?: string;
+    isDelete?: boolean;
 }
 
 const AlertMessage: React.FC<AlertMessageProps> = ({ title, colorTitle = "#FF3333", body, icon, onCancel, onConfirm, colorConfirm = "#99CC99"}) => {

@@ -21,6 +21,12 @@ public class UserController {
         return userService.getAllUsers();
     }
 
+    @GetMapping("/Secretarias")
+    public ResponseEntity<?> getAllSecretarias() {return userService.getAllSecretary();}
+
+    @GetMapping("/Enfermeras")
+    public ResponseEntity<?> getAllNurses() {return userService.getAllNurses();}
+
     // Obtener usuario por ID
     @GetMapping("/{id}")
     public ResponseEntity<?> getUserById(@PathVariable Long id) {

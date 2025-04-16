@@ -34,6 +34,21 @@ public class UserService {
         return customResponse.getOkResponse(users);
     }
 
+    public ResponseEntity<?> getAllSecretary() {
+        List<UserDto> users = userRepository.findByRoleId(2).stream()
+                .map(this::toDTO)
+                .collect(Collectors.toList());
+        return customResponse.getOkResponse(users);
+    }
+
+    public ResponseEntity<?> getAllNurses() {
+        List<UserDto> users = userRepository.findByRoleId(3).stream()
+                .map(this::toDTO)
+                .collect(Collectors.toList());
+        return customResponse.getOkResponse(users);
+    }
+
+
     public ResponseEntity<?> getUserById(Long id) {
         Optional<UserBean> user = userRepository.findById(id);
         if (user.isPresent()) {

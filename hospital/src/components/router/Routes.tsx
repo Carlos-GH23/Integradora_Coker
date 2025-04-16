@@ -9,6 +9,8 @@ import HomeNurses from '../components/home-nurses';
 import { isAdmin, isLoggedIn, isNurse, isSecretary } from '../services/LoginServices';
 import Admin from '../admin/admin';
 import Secretary from '../secretary/Secretary';
+import ListNurses from '../components/table-nurses';
+import ListSecretary from '../components/table-secretary';
 
 export const AnimatedRoutes = () => {
     const location = useLocation();
@@ -29,8 +31,8 @@ export const AnimatedRoutes = () => {
                 {admin && loggedIn && (
                 <Route path='/admin' element={<Admin/>} >
                     <Route path='' />
-                    <Route path='enfermeras' />
-                    <Route path='secretarias' />
+                    <Route path='enfermeras' element={<ListNurses/>}/>
+                    <Route path='secretarias' element={<ListSecretary/>}/>
                     <Route path='pisos' />
                 </Route>
                 )}
