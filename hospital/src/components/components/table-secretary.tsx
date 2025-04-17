@@ -3,7 +3,7 @@ import DataTable from 'datatables.net-react';
 import DT from 'datatables.net-dt';
 import { FaPen, FaPlus, FaTrash } from 'react-icons/fa';
 import { User } from '../models/UserModels';
-import { AdminServices } from '../services/AdminServices';
+import { AdminServices } from '../services/Services';
 import AlertMessage from '../custom/AlertMessage';
 import ErrorMessage from '../custom/ErrorMessage';
 import SuccessMessage from '../custom/SuccessMessage';

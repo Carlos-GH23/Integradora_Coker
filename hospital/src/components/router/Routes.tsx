@@ -12,6 +12,7 @@ import Secretary from '../secretary/Secretary';
 import ListNurses from '../components/table-nurses';
 import ListSecretary from '../components/table-secretary';
 import ListFloor from '../components/table-floors';
+import ListBeds from '../components/table-beds';
 
 export const AnimatedRoutes = () => {
     const location = useLocation();
@@ -42,7 +43,7 @@ export const AnimatedRoutes = () => {
                 <Route path='/secretaria' element={<Secretary/>}>
                     <Route path='' />
                     <Route path='enfermeras' element={<ListNurses/>}/>
-                    <Route path='camas' />                
+                    <Route path='camas' element={<ListBeds/>} />                
                 </Route>
                 )}
 

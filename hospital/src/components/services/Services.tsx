@@ -1,6 +1,7 @@
 import axios from "axios";
-import { Floor, User } from "../models/UserModels";
+import { Bed, Floor, User } from "../models/UserModels";
 
+const API_B = "http://localhost:8080/api/beds"
 const API = "http://localhost:8080/api/floors"
 const API_URL = "http://localhost:8080/api/users/" 
 
@@ -122,6 +123,24 @@ export class AdminServices<T> {
     async updateFloor(id: number, data: Partial<T>): Promise<T> {
         try {
             return axios.put(`${API}/edit/${id}`,data, this.getHeaders()).then(res => res.data);
+        } catch (error) {
+            console.error("Error al obtener los datos:", error);
+            throw error;
+        }
+    }
+
+    async getAllBeds(): Promise<{data: Bed[]}> {
+        try {
+            return axios.get<{ data: Bed[] }>(`${API_B}`, this.getHeaders()).then(res => res.data);
+        } catch (error) {
+            console.error("Error al obtener los datos:", error);
+            throw error;
+        }
+    }
+
+    async updateBeds(id: number, data: Partial<T>): Promise<T> {
+        try {
+            return axios.put(`${API_B}/edit/${id}`,data, this.getHeaders()).then(res => res.data);
         } catch (error) {
             console.error("Error al obtener los datos:", error);
             throw error;
