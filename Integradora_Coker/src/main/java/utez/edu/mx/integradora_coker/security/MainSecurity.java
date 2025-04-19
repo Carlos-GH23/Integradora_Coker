@@ -40,6 +40,7 @@ public class MainSecurity implements WebMvcConfigurer {
                         .requestMatchers("/api/patients/**").hasRole("ADMIN")
                         .requestMatchers("/api/users/all", "/api/users/{id}", "/api/users/{id}").hasRole("SECRETARY")
                         .requestMatchers("/api/floors/**", "/api/beds/**").hasAnyRole("ADMIN", "SECRETARY")
+                        .requestMatchers("/api/beds/assigned", "/api/patients/assign-bed").hasAnyRole("NURSE", "SECRETARY")
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(authFilter, UsernamePasswordAuthenticationFilter.class);

@@ -11,6 +11,7 @@ import java.util.Map;
 public class CustomResponse {
     private Map<String, Object> body;
 
+    // Respuesta con operación exitosa
     public ResponseEntity<?> getOkResponse(Object data) {
         body = new HashMap<>();
         body.put("message", "Operación exitosa");
@@ -21,6 +22,7 @@ public class CustomResponse {
         return new ResponseEntity<>(body, HttpStatus.OK);
     }
 
+    // Respuesta con creación exitosa
     public ResponseEntity<?> getCreatedResponse(String message) {
         body = new HashMap<>();
         body.put("message", message);
@@ -28,10 +30,19 @@ public class CustomResponse {
         return new ResponseEntity<>(body, HttpStatus.CREATED);
     }
 
+    // Respuesta de error con código 400
     public ResponseEntity<?> get400Response(int code) {
         body = new HashMap<>();
         body.put("message", code == 400 ? "No se pudo realizar la operación" : "No se encontró el recurso solicitado");
         body.put("status", "ERROR");
         return new ResponseEntity<>(body, code == 400 ? HttpStatus.BAD_REQUEST : HttpStatus.NOT_FOUND);
+    }
+
+    // Función personalizada para manejar respuestas con mensajes específicos
+    public ResponseEntity<?> getCustomResponse(String message, String status, HttpStatus httpStatus) {
+        body = new HashMap<>();
+        body.put("message", message);
+        body.put("status", status);
+        return new ResponseEntity<>(body, httpStatus);
     }
 }
