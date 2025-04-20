@@ -3,6 +3,8 @@ package utez.edu.mx.integradora_coker.controllers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import utez.edu.mx.integradora_coker.models.Bed.BedAssignmentDto;
+import utez.edu.mx.integradora_coker.models.Patient.PatientAssignmentDto;
 import utez.edu.mx.integradora_coker.models.Patient.PatientDto;
 import utez.edu.mx.integradora_coker.models.Patient.PatientService;
 
@@ -43,4 +45,10 @@ public class PatientController {
     public ResponseEntity<?> deletePatient(@PathVariable Long id) {
         return patientService.deletePatient(id);
     }
+
+    @PutMapping("/assign-bed")
+    public ResponseEntity<?> assignPatientToBed(@RequestBody PatientAssignmentDto data) {
+        return patientService.assignPatientToBed(data.getUserId(), data.getBedId());
+    }
+
 }

@@ -3,6 +3,7 @@ package utez.edu.mx.integradora_coker.controllers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import utez.edu.mx.integradora_coker.models.Bed.BedAssignmentDto;
 import utez.edu.mx.integradora_coker.models.Bed.BedDto;
 import utez.edu.mx.integradora_coker.models.Bed.BedService;
 
@@ -44,4 +45,20 @@ public class BedController {
     public ResponseEntity<?> deleteBed(@PathVariable Long id) {
         return bedService.deleteBed(id);
     }
+
+    @PutMapping("/assign")
+    public ResponseEntity<?> assignBedToUser(@RequestBody BedAssignmentDto data) {
+        return bedService.assignBedToUser(data.getBedId(), data.getUserId());
+    }
+
+    @PutMapping("/unassign")
+    public ResponseEntity<?> unassignBedFromUser(@RequestBody BedAssignmentDto data) {
+        return bedService.unassignBedFromUser(data.getBedId());
+    }
+
+    @PostMapping("/assigned")
+    public ResponseEntity<?> getBedsAssignedToUser(@RequestBody BedAssignmentDto data) {
+        return bedService.getBedsAssignedToUser(data.getUserId());
+    }
+
 }

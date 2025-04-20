@@ -1,10 +1,15 @@
 package utez.edu.mx.integradora_coker.models.Bed;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import utez.edu.mx.integradora_coker.kernel.CustomResponse;
+import utez.edu.mx.integradora_coker.models.floor.FloorBean;
+import utez.edu.mx.integradora_coker.models.floor.FloorRepository;
+import utez.edu.mx.integradora_coker.models.user.UserBean;
+import utez.edu.mx.integradora_coker.models.user.UserRepository;
 
 
 import java.util.List;
@@ -16,7 +21,11 @@ public class BedService {
 
     @Autowired
     private BedRepository bedRepository;
+    @Autowired
+    private UserRepository userRepository;
 
+    @Autowired
+    private FloorRepository floorRepository;
     @Autowired
     private CustomResponse customResponse;
 
@@ -39,12 +48,32 @@ public class BedService {
     }
 
     // Create a bed
+    // En tu método createBed
     @Transactional
     public ResponseEntity<?> createBed(BedDto bedDto) {
-        BedBean bed = bedDto.toEntity();
-        BedBean savedBed = bedRepository.save(bed);
-        return customResponse.getCreatedResponse("Bed created successfully");
+        // 1. Validar que el piso existe
+        Optional<FloorBean> floor = floorRepository.findById(bedDto.getFloor().getId());
+        if (!floor.isPresent()) {
+            return customResponse.get400Response(404);
+        }
+
+        // 2. Validar identificador único en el piso
+        if (bedRepository.existsByIdentifierAndFloorId(
+                bedDto.getIdentifier(),
+                floor.get().getId())) {
+            return customResponse.get400Response(409);
+        }
+
+        // 3. Crear entidad
+        BedBean bed = new BedBean();
+        bed.setIdentifier(bedDto.getIdentifier());
+        bed.setFloor(floor.get());
+
+        bedRepository.save(bed);
+        return customResponse.getCreatedResponse("Cama creada exitosamente");
     }
+
+
 
     // Update a bed
     @Transactional
@@ -55,9 +84,13 @@ public class BedService {
 
             // Update only if values are not null
             if (bedDto.getIdentifier() != null) bed.setIdentifier(bedDto.getIdentifier());
-            if (bedDto.getFloor() != null) bed.setFloor(bedDto.getFloor());
             if (bedDto.getUser() != null) bed.setUser(bedDto.getUser());
             if (bedDto.getPatient() != null) bed.setPatient(bedDto.getPatient());
+            if (bedDto.getFloor() != null) {
+                Optional<FloorBean> floor = floorRepository.findById(bedDto.getFloor().getId());
+                if (!floor.isPresent()) return customResponse.get400Response(404);
+                bed.setFloor(floor.get());
+            }
 
             BedBean updatedBed = bedRepository.save(bed);
             return customResponse.getOkResponse(toDTO(updatedBed));
@@ -76,6 +109,79 @@ public class BedService {
             return customResponse.get400Response(404);
         }
     }
+
+    @Transactional
+    public ResponseEntity<?> registerBed(BedDto bedDto, String floorIdentifier) {
+        Optional<FloorBean> floor = floorRepository.findByIdentifier(floorIdentifier);
+        if (!floor.isPresent()) {
+            return customResponse.get400Response(404);
+        }
+
+        BedBean bed = new BedBean();
+        bed.setIdentifier(bedDto.getIdentifier());
+        bed.setFloor(floor.get());
+        bedRepository.save(bed);
+
+        return customResponse.getCreatedResponse("Cama registrada exitosamente");
+    }
+
+    @Transactional
+    public ResponseEntity<?> assignBedToUser(Long bedId, Long userId) {
+        Optional<BedBean> bedOpt = bedRepository.findById(bedId);
+        Optional<UserBean> userOpt = userRepository.findById(userId);
+
+        if (!bedOpt.isPresent()) {
+            return customResponse.getCustomResponse("Cama no encontrada", "ERROR", HttpStatus.NOT_FOUND);
+        }
+        if (!userOpt.isPresent()) {
+            return customResponse.getCustomResponse("Usuario no encontrado", "ERROR", HttpStatus.NOT_FOUND);
+        }
+
+        UserBean user = userOpt.get();
+        if (!user.getRole().getName().equals("nurse")) {
+            return customResponse.getCustomResponse("El usuario no tiene rol de enfermera", "ERROR", HttpStatus.FORBIDDEN);
+        }
+
+        BedBean bed = bedOpt.get();
+        bed.setUser(user);
+        bedRepository.save(bed);
+
+        return customResponse.getCustomResponse("Cama asignada a la enfermera exitosamente", "OK", HttpStatus.OK);
+    }
+
+
+    public ResponseEntity<?> getBedsAssignedToUser(Long userId) {
+        Optional<UserBean> userOpt = userRepository.findById(userId);
+
+        if (!userOpt.isPresent()) {
+            return customResponse.getCustomResponse( "Usuario no encontrado", "ERROR", HttpStatus.NOT_FOUND);
+        }
+
+        UserBean user = userOpt.get();
+        List<BedDto> assignedBeds = bedRepository.findBedsByAssignedUser(userId).stream()
+                .map(this::toDTO)
+                .collect(Collectors.toList());
+
+        return customResponse.getOkResponse(assignedBeds);
+    }
+
+
+    @Transactional
+    public ResponseEntity<?> unassignBedFromUser(Long bedId) {
+        Optional<BedBean> bedOpt = bedRepository.findById(bedId);
+
+        if (!bedOpt.isPresent()) {
+            return customResponse.getCustomResponse("Cama no encontrada","ERROR", HttpStatus.NOT_FOUND);
+        }
+
+        BedBean bed = bedOpt.get();
+        bed.setUser(null);  
+        bedRepository.save(bed);
+
+        return customResponse.getOkResponse("Cama desasignada exitosamente");
+    }
+
+
 
     // Convert from BedBean to BedDto
     private BedDto toDTO(BedBean bed) {

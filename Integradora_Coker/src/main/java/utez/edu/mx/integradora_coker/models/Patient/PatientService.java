@@ -1,10 +1,13 @@
 package utez.edu.mx.integradora_coker.models.Patient;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import utez.edu.mx.integradora_coker.kernel.CustomResponse;
+import utez.edu.mx.integradora_coker.models.Bed.BedBean;
+import utez.edu.mx.integradora_coker.models.Bed.BedRepository;
 
 import java.util.List;
 import java.util.Optional;
@@ -18,6 +21,9 @@ public class PatientService {
 
     @Autowired
     private CustomResponse customResponse;
+
+    @Autowired
+    private BedRepository bedRepository;
 
     // Get all patients
     public ResponseEntity<?> getAllPatients() {
@@ -73,6 +79,36 @@ public class PatientService {
             return customResponse.get400Response(404);
         }
     }
+
+    @Transactional
+    public ResponseEntity<?> assignPatientToBed(Long patientId, Long bedId) {
+        Optional<PatientBean> optionalPatient = patientRepository.findById(patientId);
+        if (optionalPatient.isEmpty()) {
+            return customResponse.get400Response(404);
+        }
+
+        Optional<BedBean> optionalBed = bedRepository.findById(bedId);
+        if (optionalBed.isEmpty()) {
+            return customResponse.get400Response(404);
+        }
+
+        BedBean bed = optionalBed.get();
+
+        if (bed.getPatient() != null) {
+            return customResponse.getCustomResponse("Este paciente ya tiene una cama", "ERROR", HttpStatus.BAD_REQUEST);
+        }
+
+        PatientBean patient = optionalPatient.get();
+
+        patient.setBed(bed);
+        bed.setPatient(patient);
+
+        patientRepository.save(patient);
+        bedRepository.save(bed);
+
+        return customResponse.getOkResponse("Paciente asignado a la cama correctamente");
+    }
+
 
     // Convert from PatientBean to PatientDto
     private PatientDto toDTO(PatientBean patient) {

@@ -1,12 +1,16 @@
 package utez.edu.mx.integradora_coker.models.Bed;
 
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import utez.edu.mx.integradora_coker.models.Patient.PatientBean;
 import utez.edu.mx.integradora_coker.models.floor.FloorBean;
 import utez.edu.mx.integradora_coker.models.user.UserBean;
 
 public class BedDto {
     private Long id;
+    @NotBlank(message = "El identificador no puede estar vacío")
+    @Size(max = 10, message = "El identificador no puede exceder 10 caracteres")
     private String identifier;
     private FloorBean floor;
     private UserBean user;
