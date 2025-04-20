@@ -48,7 +48,7 @@ public class PatientService {
     public ResponseEntity<?> createPatient(PatientDto patientDto) {
         PatientBean patient = patientDto.toEntity();
         PatientBean savedPatient = patientRepository.save(patient);
-        return customResponse.getCreatedResponse("Patient created successfully");
+        return customResponse.getCreatedResponse("Paciente creado de forma exitosa");
     }
 
     // Update a patient
@@ -58,7 +58,6 @@ public class PatientService {
         if (existingPatient.isPresent()) {
             PatientBean patient = existingPatient.get();
 
-            // Update only if values are not null
             if (patientDto.getFullName() != null) patient.setFullName(patientDto.getFullName());
             if (patientDto.getBed() != null) patient.setBed(patientDto.getBed());
 
@@ -69,12 +68,11 @@ public class PatientService {
         }
     }
 
-    // Delete a patient
     @Transactional
     public ResponseEntity<?> deletePatient(Long id) {
         if (patientRepository.existsById(id)) {
             patientRepository.deleteById(id);
-            return customResponse.getOkResponse("Patient deleted successfully");
+            return customResponse.getOkResponse("Paciente eliminado de forma exitosa");
         } else {
             return customResponse.get400Response(404);
         }
@@ -110,7 +108,6 @@ public class PatientService {
     }
 
 
-    // Convert from PatientBean to PatientDto
     private PatientDto toDTO(PatientBean patient) {
         return PatientDto.fromEntity(patient);
     }

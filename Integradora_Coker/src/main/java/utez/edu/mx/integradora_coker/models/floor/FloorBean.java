@@ -16,6 +16,8 @@ public class FloorBean {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String identifier;
+    private int bednumber;
+    private boolean occupied;
 
     @OneToMany(mappedBy = "floor")
     @JsonIgnore
@@ -25,11 +27,13 @@ public class FloorBean {
     @JsonIgnore
     private Set<BedBean> beds;
 
-    public FloorBean(Long id, String identifier, Set<UserBean> users, Set<BedBean> beds) {
+    public FloorBean(Long id, String identifier,int bednumber, boolean occupied, Set<UserBean> users, Set<BedBean> beds) {
         this.id = id;
         this.identifier = identifier;
         this.users = users;
         this.beds = beds;
+        this.bednumber = bednumber;
+        this.occupied = occupied;
     }
 
     public FloorBean() {
@@ -66,4 +70,12 @@ public class FloorBean {
     public void setBeds(Set<BedBean> beds) {
         this.beds = beds;
     }
+
+    public int getBednumber() {return bednumber;}
+
+    public void setBednumber(int bednumber) {this.bednumber = bednumber;}
+
+    public boolean isOccupied() {return occupied;}
+
+    public void setOccupied(boolean occupied) {this.occupied = occupied;}
 }

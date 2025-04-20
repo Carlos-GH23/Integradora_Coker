@@ -49,22 +49,26 @@ public class BedService {
 
     // Create a bed
     // En tu método createBed
+// Create a bed
     @Transactional
     public ResponseEntity<?> createBed(BedDto bedDto) {
-        // 1. Validar que el piso existe
         Optional<FloorBean> floor = floorRepository.findById(bedDto.getFloor().getId());
         if (!floor.isPresent()) {
             return customResponse.get400Response(404);
         }
 
-        // 2. Validar identificador único en el piso
+        if (floor.get().getBeds().size() >= floor.get().getBednumber()) {
+            return customResponse.getCustomResponse("No se pueden agregar más camas. El límite es " + floor.get().getBednumber(),"ERROR",HttpStatus.CONFLICT);
+        }
+
+        // 3. Validar identificador único en el piso
         if (bedRepository.existsByIdentifierAndFloorId(
                 bedDto.getIdentifier(),
                 floor.get().getId())) {
             return customResponse.get400Response(409);
         }
 
-        // 3. Crear entidad
+        // 4. Crear entidad de cama
         BedBean bed = new BedBean();
         bed.setIdentifier(bedDto.getIdentifier());
         bed.setFloor(floor.get());
@@ -104,7 +108,7 @@ public class BedService {
     public ResponseEntity<?> deleteBed(Long id) {
         if (bedRepository.existsById(id)) {
             bedRepository.deleteById(id);
-            return customResponse.getOkResponse("Bed deleted successfully");
+            return customResponse.getOkResponse("Cama eliminada exitosamente");
         } else {
             return customResponse.get400Response(404);
         }
@@ -137,17 +141,24 @@ public class BedService {
             return customResponse.getCustomResponse("Usuario no encontrado", "ERROR", HttpStatus.NOT_FOUND);
         }
 
+        BedBean bed = bedOpt.get();
         UserBean user = userOpt.get();
-        if (!user.getRole().getName().equals("nurse")) {
+
+        if (!user.getRole().getName().equalsIgnoreCase("nurse")) {
             return customResponse.getCustomResponse("El usuario no tiene rol de enfermera", "ERROR", HttpStatus.FORBIDDEN);
         }
 
-        BedBean bed = bedOpt.get();
+        if (user.getFloor() == null || bed.getFloor() == null ||
+                !user.getFloor().getId().equals(bed.getFloor().getId())) {
+            return customResponse.getCustomResponse("El usuario y la cama no pertenecen al mismo piso.", "ERROR", HttpStatus.FORBIDDEN);
+        }
+
         bed.setUser(user);
         bedRepository.save(bed);
 
         return customResponse.getCustomResponse("Cama asignada a la enfermera exitosamente", "OK", HttpStatus.OK);
     }
+
 
 
     public ResponseEntity<?> getBedsAssignedToUser(Long userId) {
