@@ -2,12 +2,16 @@ package utez.edu.mx.integradora_coker.models.user;
 
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import utez.edu.mx.integradora_coker.kernel.CustomResponse;
 import utez.edu.mx.integradora_coker.models.Role.RoleBean;
 import utez.edu.mx.integradora_coker.models.Role.RoleRepository;
+import utez.edu.mx.integradora_coker.models.floor.FloorBean;
+import utez.edu.mx.integradora_coker.models.floor.FloorRepository;
 
 import java.util.List;
 import java.util.Optional;
@@ -25,6 +29,13 @@ public class UserService {
 
     @Autowired
     private CustomResponse customResponse;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private FloorRepository floorRepository;
+
 
     // Obtener todos los usuarios
     public ResponseEntity<?> getAllUsers() {
@@ -73,6 +84,9 @@ public class UserService {
         if (roleOpt.isEmpty()) {
             return customResponse.get400Response(404);
         }
+        String encryptedPassword = passwordEncoder.encode(userDto.getPassword());
+
+        userDto.setPassword(encryptedPassword);
 
         UserBean user = userDto.toEntity();
         user.setRole(roleOpt.get());
@@ -93,7 +107,11 @@ public class UserService {
             if (userDto.getEmail() != null) user.setEmail(userDto.getEmail());
             if (userDto.getPhoneNumber() != null) user.setPhoneNumber(userDto.getPhoneNumber());
             if (userDto.getUsername() != null) user.setUsername(userDto.getUsername());
-            if (userDto.getPassword() != null) user.setPassword(userDto.getPassword());
+
+            if (userDto.getPassword() != null) {
+                String encryptedPassword = passwordEncoder.encode(userDto.getPassword());
+                user.setPassword(encryptedPassword);
+            }
 
             UserBean updatedUser = userRepository.save(user);
             return customResponse.getOkResponse(toDTO(updatedUser));
@@ -101,6 +119,7 @@ public class UserService {
             return customResponse.get400Response(404);
         }
     }
+
 
     // Eliminar un usuario
     @Transactional
@@ -113,7 +132,88 @@ public class UserService {
         }
     }
 
+
+    @Transactional
+    public ResponseEntity<?> assignFloorToUser(Long userId, Long floorId) {
+        Optional<UserBean> userOpt = userRepository.findById(userId);
+        Optional<FloorBean> floorOpt = floorRepository.findById(floorId);
+
+        if (userOpt.isEmpty()) {
+            return customResponse.getCustomResponse("Usuario no encontrado", "ERROR", HttpStatus.NOT_FOUND);
+        }
+
+        if (floorOpt.isEmpty()) {
+            return customResponse.getCustomResponse("Piso no encontrado", "ERROR", HttpStatus.NOT_FOUND);
+        }
+
+        UserBean user = userOpt.get();
+        FloorBean floor = floorOpt.get();
+
+        String roleName = user.getRole().getName().toUpperCase();
+
+        if (!roleName.equals("SECRETARY") && !roleName.equals("NURSE")) {
+            return customResponse.getCustomResponse("Solo se pueden asignar pisos a secretarias o enfermeras", "ERROR", HttpStatus.BAD_REQUEST);
+        }
+
+        if (roleName.equals("SECRETARY")) {
+            boolean alreadyAssigned = floor.getUsers().stream()
+                    .anyMatch(u -> u.getRole().getName().equalsIgnoreCase("SECRETARY") && !u.getId().equals(userId));
+
+            if (alreadyAssigned) {
+                return customResponse.getCustomResponse("Ya hay una secretaria asignada a este piso", "ERROR", HttpStatus.CONFLICT);
+            }
+
+            user.setFloor(floor);
+            floor.setOccupied(true);
+        } else {
+            user.setFloor(floor);
+        }
+
+        userRepository.save(user);
+        floorRepository.save(floor);
+        return customResponse.getOkResponse("Piso asignado correctamente");
+    }
+
+
+    @Transactional
+    public ResponseEntity<?> unassignFloorFromUser(Long userId) {
+        Optional<UserBean> userOpt = userRepository.findById(userId);
+        if (userOpt.isEmpty()) {
+            return customResponse.getCustomResponse("Usuario no encontrado", "ERROR", HttpStatus.NOT_FOUND);
+        }
+
+        UserBean user = userOpt.get();
+        FloorBean currentFloor = user.getFloor();
+
+        if (currentFloor == null) {
+            return customResponse.getCustomResponse("El usuario no tiene piso asignado", "ERROR", HttpStatus.BAD_REQUEST);
+        }
+
+        String roleName = user.getRole().getName().toUpperCase();
+
+        user.setFloor(null);
+        userRepository.save(user);
+
+        if (roleName.equals("SECRETARY")) {
+            boolean stillHasSecretary = currentFloor.getUsers().stream()
+                    .anyMatch(u -> u.getRole().getName().equalsIgnoreCase("SECRETARY") && !u.getId().equals(user.getId()));
+
+            if (!stillHasSecretary) {
+                currentFloor.setOccupied(false);
+                floorRepository.save(currentFloor);
+            }
+        }
+
+        return customResponse.getOkResponse("Piso desasignado correctamente");
+    }
+
     private UserDto toDTO(UserBean user) {
         return UserDto.fromEntity(user);
     }
+
 }
+
+
+
+
+

@@ -3,6 +3,7 @@ package utez.edu.mx.integradora_coker.controllers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import utez.edu.mx.integradora_coker.models.user.UserAssigmentDto;
 import utez.edu.mx.integradora_coker.models.user.UserDto;
 import utez.edu.mx.integradora_coker.models.user.UserService;
 
@@ -20,12 +21,6 @@ public class UserController {
     public ResponseEntity<?> getAllUsers() {
         return userService.getAllUsers();
     }
-
-    @GetMapping("/Secretarias")
-    public ResponseEntity<?> getAllSecretarias() {return userService.getAllSecretary();}
-
-    @GetMapping("/Enfermeras")
-    public ResponseEntity<?> getAllNurses() {return userService.getAllNurses();}
 
     // Obtener usuario por ID
     @GetMapping("/{id}")
@@ -50,4 +45,15 @@ public class UserController {
     public ResponseEntity<?> deleteUser(@PathVariable Long id) {
         return userService.deleteUser(id);
     }
+
+    @PostMapping("/assign-floor")
+    public ResponseEntity<?> assignFloor(@RequestBody UserAssigmentDto data) {
+        return userService.assignFloorToUser(data.getUserId(), data.getfloorId());
+    }
+
+    @DeleteMapping("/unassign-floor/{userId}")
+    public ResponseEntity<?> unassignFloor(@PathVariable Long userId) {
+        return userService.unassignFloorFromUser(userId);
+    }
+
 }
