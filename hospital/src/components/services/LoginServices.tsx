@@ -1,13 +1,11 @@
 import axios from "axios";
 import { UserModel } from "../models/UserModel";
-
-const API_URL = "http://localhost:8080/api/auth/login" //Se cambiara la URL a 
+import { API_ENDPOINTS } from "../auth/ApiConfig";
 
 export const login = async (username: string, password: string) => {
-    const response = await axios.post(API_URL, {username, password});
+    const response = await axios.post(API_ENDPOINTS.login, {username, password});
     console.log(response.data);
-    if(response.status === 200){
-        const user: UserModel = response.data.user;
+    if(response.data.token){
         const formattedUser: UserModel = {
             role: response.data.role,
             name: response.data.name,
@@ -17,7 +15,7 @@ export const login = async (username: string, password: string) => {
         localStorage.setItem("user", JSON.stringify(formattedUser));
         localStorage.setItem("token",response.data.token);
     }
-    window.location.reload();
+    //window.location.reload();
 }
 
 export const logout = () => {

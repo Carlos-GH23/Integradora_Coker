@@ -2,14 +2,13 @@ import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import Swal from "sweetalert2";
 import { AiFillHome } from "react-icons/ai";
-import { IoLogOut } from "react-icons/io5";
 import { BsPeopleFill } from "react-icons/bs";
 import { GiFlatPlatform } from "react-icons/gi";
 import { FaUserNurse } from "react-icons/fa";
 import { IoBedSharp } from "react-icons/io5";
 import { HiChevronLeft, HiChevronRight } from "react-icons/hi";
 import { HiArrowLeftOnRectangle } from "react-icons/hi2";
-import { logout } from "../services/LoginServices";
+import { getUser, logout } from "../services/LoginServices";
 
 function MenuTop({ user }: { user: string }) {
 
@@ -35,21 +34,22 @@ function MenuTop({ user }: { user: string }) {
     };
 
     const nurse = [
-        { name: "Inicio", path: "", icon: <AiFillHome size={30} /> },
+        { name: "Inicio", path: "inicio", icon: <AiFillHome size={30} /> },
         { name: "Pacientes", path: "pacientes", icon: <BsPeopleFill size={30} /> },
     ]
 
     const secretary = [
-        { name: "Inicio", path: "", icon: <AiFillHome size={30} /> },
+        { name: "Inicio", path: "inicio", icon: <AiFillHome size={30} /> },
         { name: "Enfermeras", path: "enfermeras", icon: <FaUserNurse size={30} /> },
         { name: "Camas", path: "camas", icon: <IoBedSharp size={30} /> },
     ]
 
     const admin = [
-        { name: "Inicio", path: "", icon: <AiFillHome size={30} /> },
+        { name: "Inicio", path: "inicio", icon: <AiFillHome size={30} /> },
         { name: "Secretarias", path: "secretarias", icon: <BsPeopleFill size={30} /> },
         { name: "Enfermeras", path: "enfermeras", icon: <FaUserNurse size={30} /> },
         { name: "Pisos", path: "pisos", icon: <GiFlatPlatform size={30} /> },
+        { name: "Camas", path: "camas", icon: <IoBedSharp size={30} /> },
     ]
 
     if (user === "nurse") {
@@ -60,16 +60,18 @@ function MenuTop({ user }: { user: string }) {
                         className="absolute top-6 right-[-15px] bg-white text-[#0077B6] rounded-full p-1 border-2 border-solid"
                         onClick={() => setIsOpen(!isOpen)}
                     >
-                        {isOpen ? <HiChevronLeft size={25} className="text-[#0077B6]" /> : <HiChevronRight size={25} className="text-[#0077B6]" />}
+                        <HiChevronLeft size={25} className="text-[#0077B6]" />
                     </button>
                     <div className="flex items-center gap-x-4 mb-6">
                         <img
-                            src="https://i.pinimg.com/736x/55/0e/2e/550e2e29394d7b437525f585ff30ac55.jpg"
+                            src="https://imgcdn.stablediffusionweb.com/2024/11/14/f9805931-89ff-4ba1-9f70-cd0fae7a8d73.jpg"
                             alt="User"
                             className="w-10 h-10 rounded-full border-2 "
                         />
                         {isOpen && (
                             <div className="flex flex-col max-w-xs overflow-hidden">
+                                <h2 className="text-lg font-semibold">{getUser()?.name ?? "Sin identidad"}</h2>
+                                <h2 className="text-sm text-white truncate">{getUser()?.user ?? "Sin identidad"}</h2>
                             </div>
                         )}
                     </div>
@@ -82,7 +84,7 @@ function MenuTop({ user }: { user: string }) {
                                 ${location.pathname.includes(item.path) ? "bg-white text-[#0077B6]" : "hover:bg-[#0077B6] hover:text-black"}`}
                                 onClick={() => navigate(item.path)}
                             >
-                                <span className={`${location.pathname.includes(item.path) ? "text-white" : "text-[#3B82F6]"}`}>
+                                <span className={"text-[#3B82F6]"}>
                                     {item.icon}
                                 </span>
                                 {isOpen && <span>{item.name}</span>}
@@ -111,12 +113,14 @@ function MenuTop({ user }: { user: string }) {
                     </button>
                     <div className="flex items-center gap-x-4 mb-6">
                         <img
-                            src="https://i.pinimg.com/736x/4d/a7/85/4da7852cd8d1673b38ca81cf1b4ba4be.jpg"
+                            src="https://i.pinimg.com/736x/60/c0/44/60c04474628c044f766112852c7f835e.jpg"
                             alt="User"
                             className="w-10 h-10 rounded-full border-2 "
                         />
                         {isOpen && (
                             <div className="flex flex-col max-w-xs overflow-hidden">
+                                <h2 className="text-lg font-semibold">{getUser()?.name ?? "Sin identidad"}</h2>
+                                <h2 className="text-sm text-white truncate">{getUser()?.user ?? "Sin identidad"}</h2>
                             </div>
                         )}
                     </div>
@@ -125,14 +129,14 @@ function MenuTop({ user }: { user: string }) {
                             <li
                                 key={item.path}
                                 className={`flex items-center gap-x-3 p-2 rounded-lg cursor-pointer transition duration-300 w-full 
-                                ${location.pathname.includes(item.path) ? "bg-white text-[#34495E]" : "hover:bg-white hover:text-[#34495E] text-white"}}`}
+                                ${location.pathname.includes(item.path) ? "bg-white text-[#34495E]" : "hover:bg-white hover:text-[#34495E] text-black"}}`}
                                 onClick={() => navigate(item.path)}
                             >
                                 <span className={`transition-colors duration-300 ${location.pathname.includes(item.path)
                                     ? "text-[#0077B6]" : "text-[#0077B6] group-hover:text-[#34495E]"}`}>
                                     {item.icon}
                                 </span>
-                                {isOpen && <span>{item.name}</span>}
+                                {isOpen && <span className={`${location.pathname.includes(item.path)? "text-black" : "group-hover:text-black"}`}>{item.name}</span>}
                             </li>
                         ))}
                     </ul>
@@ -158,12 +162,14 @@ function MenuTop({ user }: { user: string }) {
                     </button>
                     <div className="flex items-center gap-x-4 mb-6">
                         <img
-                            src="https://i.pinimg.com/736x/55/0e/2e/550e2e29394d7b437525f585ff30ac55.jpg"
+                            src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTGKmi18Y0Kl3HK6ydXMPTS6093IzCsyDWuTQ&s"
                             alt="User"
                             className="w-10 h-10 rounded-full border-2 "
                         />
                         {isOpen && (
                             <div className="flex flex-col max-w-xs overflow-hidden">
+                                <h2 className="text-lg font-semibold">{getUser()?.name ?? "Sin identidad"}</h2>
+                                <h2 className="text-sm text-white truncate">{getUser()?.user ?? "Sin identidad"}</h2>
                             </div>
                         )}
                     </div>
@@ -172,7 +178,7 @@ function MenuTop({ user }: { user: string }) {
                             <li
                                 key={item.path}
                                 className={`flex items-center gap-x-3 p-2 rounded-lg cursor-pointer transition duration-300 w-full 
-                    ${location.pathname.includes(item.path) ? "bg-[#1D4ED8] text-white" : "hover:bg-white hover:text-black"}`}
+                                ${location.pathname.includes(item.path) ? "bg-[#1D4ED8] text-white" : "hover:bg-white hover:text-black"}`}
                                 onClick={() => navigate(item.path)}
                             >
                                 <span className={`${location.pathname.includes(item.path) ? "text-white" : "text-[#3B82F6]"}`}>

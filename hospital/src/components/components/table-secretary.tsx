@@ -11,21 +11,23 @@ import ModalForm from '../custom/ModalForm';
 
 DataTable.use(DT);
 const ListSecretary = () => {
-
-    const [formData, setFormData] = useState<User>({ id: 0, fullName: "", email: "", phoneNumber: "", username: "", password: "", floor: "" });
-    const [errors, setErrors] = useState<{ fullName?: string; email?: string; phoneNumber?: string; username?: string; password?: string; floor?: string }>({});
-
+    const [loading, setLoading] = useState(true);
+    const [secretary, setSecretarys] = useState<User[]>([]);
+    const [formData, setFormData] = useState<User>({ id: 0, fullName: "", email: "", phoneNumber: "", username: "", password: ""});
+    
     const [viewModalForm, setViewModalForm] = useState(false);
-    const isEdit = formData.id !== 0;
     const [selectedSecretary, setSelectedSecretary] = useState<User | null>(null);
     const [alertMessage, setAlertMessage] = useState(false);
     const [errorMessage, setErrorMessage] = useState("");
     const [successMessage, setSuccessMessage] = useState("");
 
-    const [secretary, setSecretarys] = useState<User[]>([]);
     const Service = new AdminServices<User>();
+    const [errors, setErrors] = useState<{ fullName?: string; email?: string; phoneNumber?: string; username?: string; password?: string}>({});
+    
+    const isEdit = formData.id !== 0;  
 
     const fetchsecretarys = async () => {
+        setLoading(true);
         try {
             const response = await Service.getAllSecretary();
             const secretaryArray: User[] = response.data;
@@ -34,7 +36,7 @@ const ListSecretary = () => {
         } catch (error) {
             console.error(error)
         } finally {
-            console.log("Que bien")
+            setLoading(false);
         }
     };
 
@@ -43,16 +45,55 @@ const ListSecretary = () => {
     }, []);
 
     const validateForm = () => {
-        let newErrors: { fullName?: string; email?: string; phoneNumber?: string; username?: string; password?: string; } = {};
-        if (!formData.fullName.trim()) newErrors.fullName = "El nombre es obligatorio";
-        if (!formData.email.trim()) newErrors.email = "El apellido es obligatorio";
-        if (!formData.phoneNumber.trim()) newErrors.phoneNumber = "El telefono es obligatorio";
-        if (!formData.username.trim()) newErrors.username = "El correo es obligatorio";
-        if (!formData.password.trim()) newErrors.password = "El genero es obligatoria";
+        let newErrors: { fullName?: string; email?: string; phoneNumber?: string; username?: string; password?: string } = {};
+    
+        // Validar nombre completo
+        const nameRegex = /^[A-Za-zÁÉÍÓÚáéíóúñÑ\s]+$/;
+        if (!formData.fullName.trim()) {
+            newErrors.fullName = "El nombre es obligatorio";
+        } else if (!nameRegex.test(formData.fullName.trim())) {
+            newErrors.fullName = "El nombre solo puede contener letras y espacios";
+        }
+    
+        // Validar correo
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!formData.email.trim()) {
+            newErrors.email = "El correo es obligatorio";
+        } else if (!emailRegex.test(formData.email.trim())) {
+            newErrors.email = "Ingresa un correo válido";
+        }
+    
+        // Validar teléfono
+        const phoneRegex = /^\d{10}$/;
+        if (!formData.phoneNumber.trim()) {
+            newErrors.phoneNumber = "El teléfono es obligatorio";
+        } else if (!phoneRegex.test(formData.phoneNumber.trim())) {
+            newErrors.phoneNumber = "El teléfono debe contener exactamente 10 dígitos numéricos";
+        }
+    
+        // Validar usuario
+        const usernameRegex = /^[A-Za-z0-9_]+$/;
+        if (!formData.username.trim()) {
+            newErrors.username = "El usuario es obligatorio";
+        } else if (!usernameRegex.test(formData.username.trim())) {
+            newErrors.username = "El usuario no debe contener espacios ni caracteres especiales";
+        }
+    
+        // Validar contraseña (solo si es nuevo)
+        if (!isEdit) {
+            if (!formData.password.trim()) {
+                newErrors.password = "La contraseña es obligatoria";
+            } else if (/\s/.test(formData.password)) {
+                newErrors.password = "La contraseña no debe contener espacios";
+            }
+        }
+    
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
     };
+
     const handleSubmit = async () => {
+        setErrorMessage("");
         try {
             const editNewNurse = {
                 fullName: formData.fullName,
@@ -63,24 +104,26 @@ const ListSecretary = () => {
             };
             if (formData.id === 0) {
                 await Service.createSecretary(editNewNurse as User);
-                setSuccessMessage("Cliente creado exitosamente");
+                setSuccessMessage("Secretaria(o) creada exitosamente");
             } else {
                 await Service.updateSecretary(formData.id, editNewNurse as User);
-                setSuccessMessage("Cliente editado exitosamente");
+                setSuccessMessage("Secretaria(o) editada exitosamente");
             }
+            setAlertMessage(false);
+            toggleModalForm();
             fetchsecretarys();
         } catch (error) {
             setErrorMessage(`${error}`);
-        } finally {
-            setAlertMessage(false);
-            toggleModalForm();
         }
     };
-    const handleDelete = (client: User) => {
-        setSelectedSecretary(client);
+
+    const handleDelete = (secretary: User) => {
+        setSelectedSecretary(secretary);
         setAlertMessage(true);
     };
+
     const confirmDelete = async () => {
+        setErrorMessage("");
         try {
             if (selectedSecretary) {
                 await Service.deleteSecretary(selectedSecretary.id)
@@ -93,21 +136,29 @@ const ListSecretary = () => {
             setAlertMessage(false);
         }
     };
+
     const toggleModalForm = () => {
         setViewModalForm(!viewModalForm);
         setErrors({});
     };
-    const handleChange = (key: keyof User, value: string | number | Date) => {
+
+    const handleChange = (key: keyof User, value: string | number) => {
         setFormData({ ...formData, [key]: value });
         setErrors((prevErrors) => ({ ...prevErrors, [key]: undefined }));
     };
 
-
+    if (loading) {
+        return (
+            <div className="w-full h-screen flex items-center justify-center">
+                <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-blue-500 border-solid"></div>
+            </div>
+        );
+    }
 
     return (
         <div className="pt-4 w-full ">
 
-            <div className="w-full h-15 rounded-lg bg-gray-900 text-white mb-2 flex justify-center items-center">
+            <div className="w-full h-15 rounded-lg bg-[#34495E] text-white mb-2 flex justify-center items-center">
                 <h2 className="text-2xl font-bold text-center font-serif">Secretarias</h2>
             </div>
 
@@ -166,7 +217,7 @@ const ListSecretary = () => {
 
             <button className="fixed bottom-6 right-6 bg-green-600 text-white p-4 rounded-full shadow-lg hover:bg-green-700 transition"
                 onClick={() => {
-                    setFormData({ id: 0, fullName: "", email: "", phoneNumber: "", username: "", password: "", floor: "" });
+                    setFormData({ id: 0, fullName: "", email: "", phoneNumber: "", username: "", password: ""});
                     toggleModalForm();
                 }}
             >
@@ -183,12 +234,12 @@ const ListSecretary = () => {
                 body={
                     <>
                         <div>
-                            <label className="block text-sm font-medium">Nombre</label>
+                            <label className="block text-sm font-medium">Nombre Completo</label>
                             <input
                                 type="text"
                                 value={formData.fullName}
                                 onChange={(e) => handleChange("fullName", e.target.value)}
-                                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-400"
+                                className="w-full p-3 border border-gray-300 rounded-lg"
                             />
                             {errors.fullName && <p className="text-red-500 text-sm">{errors.fullName}</p>}
                         </div>
@@ -198,50 +249,45 @@ const ListSecretary = () => {
                                 type="text"
                                 value={formData.username}
                                 onChange={(e) => handleChange("username", e.target.value)}
-                                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-400"
+                                className="w-full p-3 border border-gray-300 rounded-lg"
                             />
                             {errors.username && <p className="text-red-500 text-sm">{errors.username}</p>}
                         </div>
                         <div>
-                            <label className="block text-sm font-medium">Telefono</label>
+                        <label className="block text-sm font-medium">Telefono</label>
                             <input
                                 type="text"
                                 value={formData.phoneNumber}
                                 onChange={(e) => handleChange("phoneNumber", e.target.value)}
-                                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-400"
+                                maxLength={10}
+                                inputMode="numeric"
+                                pattern="\d*"
+                                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2"
                             />
                             {errors.phoneNumber && <p className="text-red-500 text-sm">{errors.phoneNumber}</p>}
                         </div>
                         <div>
-                            <label className="block text-sm font-medium">Piso</label>
-                            <input
-                                type="text"
-                                value={formData.floor}
-                                onChange={(e) => handleChange("floor", e.target.value)}
-                                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-400"
-                            />
-                            {errors.floor && <p className="text-red-500 text-sm">{errors.floor}</p>}
-                        </div>
-                        <div>
                             <label className="block text-sm font-medium">Correo</label>
                             <input
-                                type="text"
+                                type="email"
                                 value={formData.email}
                                 onChange={(e) => handleChange("email", e.target.value)}
-                                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-400"
+                                className="w-full p-3 border border-gray-300 rounded-lg"
                             />
                             {errors.email && <p className="text-red-500 text-sm">{errors.email}</p>}
                         </div>
-                        <div>
-                            <label className="block text-sm font-medium">Contraseña</label>
-                            <input
-                                type="password"
-                                value={formData.password}
-                                onChange={(e) => handleChange("password", e.target.value)}
-                                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-400"
-                            />
-                            {errors.password && <p className="text-red-500 text-sm">{errors.password}</p>}
-                        </div>
+                        {!isEdit && (
+                            <div>
+                                <label className="block text-sm font-medium">Contraseña</label>
+                                <input
+                                    type="password"
+                                    value={formData.password}
+                                    onChange={(e) => handleChange("password", e.target.value)}
+                                    className="w-full p-3 border border-gray-300 rounded-lg"
+                                />
+                                {errors.password && <p className="text-red-500 text-sm">{errors.password}</p>}
+                            </div>
+                        )}
                     </>
                 }
                 textConfirm={isEdit ? "Confirmación actualización" : "Confirmación registro"}

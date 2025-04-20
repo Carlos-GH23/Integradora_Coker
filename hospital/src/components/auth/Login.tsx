@@ -1,24 +1,33 @@
 import React, { useState } from 'react';
-import axios from 'axios';
 import { FaUser, FaEyeSlash, FaEye } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom'
 import hospitalBg from "../../assets/hospital.jpg";
 import ErrorMessage from '../custom/ErrorMessage';
-import { login } from '../services/LoginServices';
+import { isAdmin, isNurse, isSecretary, login } from '../services/LoginServices';
 
 function Login() {
+    const navigation = useNavigate();
     const [username, setUsername] = useState<string>('');
     const [password, setPassword] = useState<string>('');
-    const [remember, setRemember] = useState<boolean>(false);
     const [seePassword, setSeePassword] = useState<boolean>(false);
     const [error, setError] = useState<string>('');
-    const navigation = useNavigate();
 
     const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         setError('');
         try {
             await login(username,password);
+            const user = localStorage.getItem("user");
+            console.log("Login successful: ", user);
+            if(isAdmin()) {
+                navigation("/admin/inicio");
+            }
+            if(isSecretary()) {
+                navigation("/secretaria/inicio");
+            }
+            if(isNurse()) {
+                navigation("/enfermera/inicio");
+            }
         } catch (error) {
             console.log('Error: ', error)
             setError('Usuario o contraseña incorrectos');
@@ -59,19 +68,6 @@ function Login() {
                             onClick={() => setSeePassword(!seePassword)}>
                             {seePassword ? <FaEye className="text-black" /> : <FaEyeSlash className="text-black" />}
                         </span>
-                    </div>
-
-                    <div className="flex justify-between text-sm">
-                        <label className="flex items-center text-black">
-                            <input 
-                                type="checkbox" 
-                                name="remember" 
-                                checked={remember} 
-                                onChange={(e) => setRemember(e.target.checked)}
-                                className="mr-2 accent-black"
-                            />
-                            Recuérdame
-                        </label>
                     </div>
                     
                     <button type="submit" 

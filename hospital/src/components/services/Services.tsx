@@ -138,9 +138,27 @@ export class AdminServices<T> {
         }
     }
 
+    async createBed(data: T): Promise<T> {
+        try {
+            return axios.post(`${API_B}/create`,data, this.getHeaders()).then(res => res.data);
+        } catch (error) {
+            console.error("Error al obtener los datos:", error);
+            throw error;
+        }
+    }
+
     async updateBeds(id: number, data: Partial<T>): Promise<T> {
         try {
             return axios.put(`${API_B}/edit/${id}`,data, this.getHeaders()).then(res => res.data);
+        } catch (error) {
+            console.error("Error al obtener los datos:", error);
+            throw error;
+        }
+    }
+
+    async deleteBed(id: number): Promise<void> {
+        try {
+            return axios.post(`${API_B}/delete${id}`, this.getHeaders()).then(res => res.data);
         } catch (error) {
             console.error("Error al obtener los datos:", error);
             throw error;

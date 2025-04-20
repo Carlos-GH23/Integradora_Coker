@@ -39,7 +39,7 @@ const ModalForm = ({ isOpen, onClose, onSubmit, body, title = "Formulario", text
         <>
             {/* Modal principal */}
             <div className="fixed inset-0 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-                <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-lg sm:max-w-md md:max-w-xl lg:max-w-2xl min-h-[40vh] max-h-[90vh] overflow-y-auto relative">
+                <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-lg sm:max-w-md md:max-w-xl lg:max-w-2xl max-h-[90vh] overflow-y-auto relative">
                     
                     <button onClick={onClose} className="absolute top-2 right-2 text-red-500 hover:text-red-700 cursor-pointer">
                         <IoClose size={30} />
