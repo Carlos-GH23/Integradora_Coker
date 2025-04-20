@@ -13,6 +13,7 @@ import ListNurses from '../components/table-nurses';
 import ListSecretary from '../components/table-secretary';
 import ListFloor from '../components/table-floors';
 import ListBeds from '../components/table-beds';
+import { AiFillHome } from 'react-icons/ai';
 
 export const AnimatedRoutes = () => {
     const location = useLocation();
@@ -32,16 +33,17 @@ export const AnimatedRoutes = () => {
 
                 {admin && loggedIn && (
                 <Route path='/admin' element={<Admin/>} >
-                    <Route path='' />
+                    <Route path='inicio' element={<AiFillHome/>}/>
                     <Route path='enfermeras' element={<ListNurses/>}/>
                     <Route path='secretarias' element={<ListSecretary/>}/>
                     <Route path='pisos' element={<ListFloor/>} />
+                    <Route path='camas' element={<ListBeds/>} />
                 </Route>
                 )}
 
                 {secretary && loggedIn && (
                 <Route path='/secretaria' element={<Secretary/>}>
-                    <Route path='' />
+                    <Route path='inicio' element={<AiFillHome/>}/>
                     <Route path='enfermeras' element={<ListNurses/>}/>
                     <Route path='camas' element={<ListBeds/>} />                
                 </Route>
@@ -49,7 +51,7 @@ export const AnimatedRoutes = () => {
 
                 {nurse && loggedIn && (
                 <Route path="/enfermera" element={<Nurses />} >
-                    <Route path='' element={<HomeNurses/>} />
+                    <Route path='inicio' element={<HomeNurses/>} />
                     <Route path='pacientes' element={<Tablepacients/>} />
                 </Route>
                 )}

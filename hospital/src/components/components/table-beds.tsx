@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import DataTable from 'datatables.net-react';
 import DT from 'datatables.net-dt';
-import { FaPen } from 'react-icons/fa';
+import { FaPen, FaPlus, FaTrash } from 'react-icons/fa';
 import { Bed, Floor, Patient, User } from '../models/UserModels';
 import { AdminServices } from '../services/Services';
 import ErrorMessage from '../custom/ErrorMessage';
@@ -11,48 +11,77 @@ import { isSecretary } from '../services/LoginServices';
 
 DataTable.use(DT);
 const ListBeds = () => {
-    const [formData, setFormData] = useState<Bed>({ id: 0, identifier: "", floor: { id: 0, identifier: "" }, user: { id: 0, fullName: "", email: "", phoneNumber: "", username: "", password: "", floor: '' }, patient: { id: 0, fullName: "" } });
-    const [errors, setErrors] = useState<{ identifier?: string; floor?: Floor, user?: User, patient?: Patient }>({});
+    const [loading, setLoading] = useState(true);
     const [beds, setbeds] = useState<Bed[]>([]);
-    const [nurses, setNurses] = useState<User[]>([]);
-    const Service = new AdminServices<Bed>();
-
+    const [formData, setFormData] = useState<Bed>({ id: 0, identifier: "", floor: { id: 0, identifier: "" }, user: { id: 0, fullName: "", email: "", phoneNumber: "", username: "", password: "" }, patient: { id: 0, fullName: "" } });
+    
     const [viewModalForm, setViewModalForm] = useState(false);
-    const isEdit = formData.id !== 0;
     const [selectedBed, setSelectedBed] = useState<Bed | null>(null);
     const [alertMessage, setAlertMessage] = useState(false);
     const [errorMessage, setErrorMessage] = useState("");
     const [successMessage, setSuccessMessage] = useState("");
 
+    const Service = new AdminServices<Bed>();
+    const [errors, setErrors] = useState<{ identifier?: string; floor?: Floor, user?: User, patient?: Patient }>({});
+    
+    const secretaryService = new AdminServices<User>();
+    const nursesService = new AdminServices<User>();
+    const floorService = new AdminServices<Floor>();
+    const [secretary, setSecretarys] = useState<User[]>([]);
+    const [nurses, setNurses] = useState<User[]>([]);
+    const [floors, setfloors] = useState<Floor[]>([]);
+
+    const isEdit = formData.id !== 0;  
+
+
     const fetchBeds = async () => {
+        setLoading(true);
         try {
             const response = await Service.getAllBeds();
             const bedArray: Bed[] = response.data;
             setbeds(bedArray);
-            console.log(bedArray);
         } catch (error) {
             console.error(error)
         } finally {
-            console.log("Que bien")
+            setLoading(false);
         }
     };
 
-    const fetchNurses = async () => {
+    const fetchSecretarys = async () => { 
         try {
-            const response = await Service.getAllNurses();
-            const nursesArray: User[] = response.data;
-            setNurses(nursesArray);
-            console.log(nursesArray);
+            const response = await secretaryService.getAllSecretary();
+            const secretaryArray: User[] = response.data;
+            setSecretarys(secretaryArray);
         } catch (error) {
             console.error(error)
-        } finally {
-            console.log("Que bien")
+        }
+    };
+
+    const fetchNurses = async () => { 
+        try {
+            const response = await nursesService.getAllSecretary();
+            const secretaryArray: User[] = response.data;
+            setNurses(secretaryArray);
+        } catch (error) {
+            console.error(error)
+        }
+    };
+
+    const fetchFloors = async () => { 
+        try {
+            const response = await floorService.getAllFloor();
+            const floorArray: Floor[] = response.data;
+            setfloors(floorArray);
+        } catch (error) {
+            console.error(error)
         }
     };
 
     useEffect(() => {
-        fetchNurses();
         fetchBeds();
+        fetchSecretarys();
+        fetchNurses();
+        fetchFloors();
     }, []);
 
     const validateForm = () => {
@@ -63,18 +92,59 @@ const ListBeds = () => {
     };
 
     const handleSubmit = async () => {
+        setErrorMessage("");
         try {
-            const editNewbeds = {
+            const editNewBeds = {
                 identifier: formData.identifier,
+                floor: {
+                    id: formData.floor?.id,
+                    identifier: formData.floor?.identifier,
+                },
+                user: {
+                    id: formData.user?.id,
+                    fullName: formData.user?.fullName,
+                    email: formData.user?.email,
+                    phoneNumber: formData.user?.phoneNumber,
+                    username: formData.user?.username,
+                    password: formData.user?.password,
+                },
+                patient: {
+                    id: formData.patient?.id,
+                    fullName: formData.patient?.fullName,
+                },
             };
-            Service.updateBeds(formData.id, editNewbeds as Bed)
-            setSuccessMessage("Camilla editado exitosamente");
+            if (formData.id === 0) {
+                await Service.createBed(editNewBeds as Bed);
+                setSuccessMessage("Cama creada exitosamente");
+            } else {
+                await Service.updateBeds(formData.id, editNewBeds as Bed);
+                setSuccessMessage("Cama editada exitosamente");
+            }
+            setAlertMessage(false);
+            toggleModalForm();
             fetchBeds();
+        } catch (error) {
+            setErrorMessage(`${error}`);
+        }
+    };
+
+    const handleDelete = (bed: Bed) => {
+        setSelectedBed(bed);
+        setAlertMessage(true);
+    };
+
+    const confirmDelete = async () => {
+        setErrorMessage("");
+        try {
+            if (selectedBed) {
+                await Service.deleteBed(selectedBed.id)
+                setSuccessMessage("Eliminación exitosamente");
+                fetchBeds();
+            }
         } catch (error) {
             setErrorMessage(`${error}`);
         } finally {
             setAlertMessage(false);
-            toggleModalForm();
         }
     };
 
@@ -83,7 +153,7 @@ const ListBeds = () => {
         setErrors({});
     };
 
-    const handleChange = (key: keyof Bed, value: string | number | Date | Floor | User | Patient | undefined) => {
+    const handleChange = (key: keyof Bed, value: string | number | Floor | User | Patient | undefined) => {
         setFormData({ ...formData, [key]: value });
         setErrors((prevErrors) => ({ ...prevErrors, [key]: undefined }));
     };
@@ -91,7 +161,7 @@ const ListBeds = () => {
     return (
         <div className="pt-4 w-full ">
 
-            <div className="w-full h-15 rounded-lg bg-gray-900 text-white mb-2 flex justify-center items-center">
+            <div className="w-full h-15 rounded-lg bg-[#34495E] text-white mb-2 flex justify-center items-center">
                 <h2 className="text-2xl font-bold text-center font-serif">Camas</h2>
             </div>
 
@@ -131,6 +201,11 @@ const ListBeds = () => {
                                         >
                                             <FaPen size={18} />
                                         </button>
+                                        <button
+                                            className="w-10 h-10 flex items-center justify-center bg-red-500 text-white rounded-full hover:bg-red-700 transition cursor-pointer"
+                                            onClick={() => handleDelete(bed)}>
+                                            <FaTrash size={18} />
+                                        </button>
                                     </td>
                                 )}
 
@@ -139,6 +214,15 @@ const ListBeds = () => {
                     </tbody>
                 </DataTable>
             </div>
+
+            <button className="fixed bottom-6 right-6 bg-green-600 text-white p-4 rounded-full shadow-lg hover:bg-green-700 transition"
+                onClick={() => {
+                    setFormData({ id: 0, identifier: "", floor: { id: 0, identifier: "" }, user: { id: 0, fullName: "", email: "", phoneNumber: "", username: "", password: "" }, patient: { id: 0, fullName: "" } });
+                    toggleModalForm();
+                }}
+            >
+                <FaPlus size={24} />
+            </button>
 
             <ModalForm
                 isOpen={viewModalForm}
@@ -162,26 +246,68 @@ const ListBeds = () => {
                             <div>
                                 <label className="block text-sm font-medium">Enfermera asignada</label>
                                 <select
-                                    value={formData.user?.id || ""}
+                                    value={formData.user?.id || 0}
                                     onChange={(e) => {
-                                        const selectedNurse = nurses.find(n => n.id === Number(e.target.value));
-                                        handleChange("user", selectedNurse);
+                                        const selectedNurseId = parseInt(e.target.value);
+                                        const selectedNurse = nurses.find(f => f.id === selectedNurseId);
+                                        if (selectedNurse) {
+                                            setFormData({
+                                                ...formData,
+                                                user: {
+                                                    id: selectedNurse.id,
+                                                    fullName: selectedNurse.fullName,
+                                                    email: selectedNurse.email,
+                                                    phoneNumber: selectedNurse.phoneNumber,
+                                                    username: selectedNurse.username,
+                                                    password: selectedNurse.password,
+                                                }
+                                            });
+                                            setErrors(prev => ({ ...prev, floor: undefined }));
+                                        }
                                     }}
-                                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-400"
+                                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2"
                                 >
-                                    <option value="" disabled hidden>Seleccionar</option>
+                                    <option value="0" disabled hidden>Seleccionar enfermera</option>
                                     {nurses.map(nurse => (
                                         <option key={nurse.id} value={nurse.id}>
                                             {nurse.fullName}
                                         </option>
                                     ))}
                                 </select>
-                                {errors.user && <p className="text-red-500 text-sm">{errors.user?.fullName}</p>}
+                                {errors.user && <p className="text-red-500 text-sm">{errors.user.fullName ?? "Sin identificar"}</p>}
                             </div>
+
+                            <div>
+                                <label className="block text-sm font-medium">Piso asignado</label>
+                                <select
+                                    value={formData.floor?.id || 0}
+                                    onChange={(e) => {
+                                        const selectedFloorId = parseInt(e.target.value);
+                                        const selectedFloor = floors.find(f => f.id === selectedFloorId);
+                                        if (selectedFloor) {
+                                            setFormData({
+                                                ...formData,
+                                                floor: {
+                                                    id: selectedFloor.id,
+                                                    identifier: selectedFloor.identifier,
+                                                }
+                                            });
+                                            setErrors(prev => ({ ...prev, floor: undefined }));
+                                        }
+                                    }}
+                                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2"
+                                >
+                                    <option value="0" disabled hidden>Seleccionar piso</option>
+                                    {floors.map(floor => (
+                                        <option key={floor.id} value={floor.id}>
+                                            {floor.identifier}
+                                        </option>
+                                    ))}
+                                </select>
+                                {errors.floor && <p className="text-red-500 text-sm">{errors.floor?.identifier}</p>}
+                            </div>
+
                         </div>
-                        <button onClick={() => { handleSubmit() }}
-                            type="submit"
-                            className="bg-purple-600 hover:bg-purple-700 w-full text-white font-bold py-2 px-4 rounded">Confirmar</button>
                     </>
                 }
                 textConfirm={isEdit ? "Confirmación actualización" : "Confirmación registro"}
