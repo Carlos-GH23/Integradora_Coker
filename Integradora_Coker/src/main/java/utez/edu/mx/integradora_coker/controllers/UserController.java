@@ -1,5 +1,6 @@
 package utez.edu.mx.integradora_coker.controllers;
 
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -36,13 +37,13 @@ public class UserController {
 
     // Crear un usuario con un rol específico
     @PostMapping("/create/{roleName}")
-    public ResponseEntity<?> createUser(@PathVariable String roleName, @RequestBody UserDto userDto) {
+    public ResponseEntity<?> createUser(@PathVariable String roleName,@Valid @RequestBody UserDto userDto) {
         return userService.createUserWithRole(userDto, roleName);
     }
 
     // Actualizar un usuario
     @PutMapping("/{id}")
-    public ResponseEntity<?> updateUser(@PathVariable Long id, @RequestBody UserDto userDto) {
+    public ResponseEntity<?> updateUser(@PathVariable Long id,@Valid @RequestBody UserDto userDto) {
         return userService.updateUser(id, userDto);
     }
 

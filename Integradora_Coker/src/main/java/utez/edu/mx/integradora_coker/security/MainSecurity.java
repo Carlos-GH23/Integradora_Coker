@@ -41,11 +41,12 @@ public class MainSecurity implements WebMvcConfigurer {
         http.csrf(csrf -> csrf.disable()).cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(WHITE_LIST).permitAll()
-                        .requestMatchers("/api/users/create/**").hasRole("ADMIN")
-                        .requestMatchers("/api/patients/**").hasAnyRole("ADMIN","NURSE")
-                        .requestMatchers("/api/users/all", "/api/users/{id}", "/api/users/{id}").hasAnyRole("ADMIN","SECRETARY")
+                        .requestMatchers("/api/users/create/**", "/api/bitacora", "/api/users/all", "/api/patients/**").hasRole("ADMIN")
+                        .requestMatchers("/api/users/assign-floor", "/api/users/unassign-floor/**").hasAnyRole("ADMIN", "SECRETARY")
+                        .requestMatchers("/api/patients/create", "/api/patients/edit/**").hasAnyRole("NURSE", "SECRETARY")
+                        .requestMatchers("/api/users/{id}").hasAnyRole("SECRETARY", "ADMIN")
                         .requestMatchers("/api/floors/**", "/api/beds/**").hasAnyRole("ADMIN", "SECRETARY")
-                        .requestMatchers("/api/beds/assigned", "/api/patients/assign-bed").hasAnyRole("NURSE", "SECRETARY")
+                        .requestMatchers("/api/beds/assigned", "/api/patients/assign-bed", "/api/patients/unassign-bed/**").hasAnyRole("NURSE", "SECRETARY")
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(authFilter, UsernamePasswordAuthenticationFilter.class);

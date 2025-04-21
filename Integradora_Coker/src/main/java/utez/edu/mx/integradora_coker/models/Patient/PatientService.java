@@ -79,33 +79,61 @@ public class PatientService {
     }
 
     @Transactional
-    public ResponseEntity<?> assignPatientToBed(Long patientId, Long bedId) {
+    public ResponseEntity<?> assignBedToPatient(Long patientId, Long bedId) {
         Optional<PatientBean> optionalPatient = patientRepository.findById(patientId);
+        Optional<BedBean> optionalBed = bedRepository.findById(bedId);
+
         if (optionalPatient.isEmpty()) {
             return customResponse.get400Response(404);
         }
 
-        Optional<BedBean> optionalBed = bedRepository.findById(bedId);
         if (optionalBed.isEmpty()) {
             return customResponse.get400Response(404);
         }
 
         BedBean bed = optionalBed.get();
-
-        if (bed.getPatient() != null) {
-            return customResponse.getCustomResponse("Este paciente ya tiene una cama", "ERROR", HttpStatus.BAD_REQUEST);
+        if (bed.isOccupied()) {
+            return customResponse.getCustomResponse("La cama ya está ocupada", "ERROR", HttpStatus.CONFLICT);
         }
 
         PatientBean patient = optionalPatient.get();
 
-        patient.setBed(bed);
         bed.setPatient(patient);
+        bed.setOccupied(true);
+        patient.setBed(bed);
 
-        patientRepository.save(patient);
         bedRepository.save(bed);
+        patientRepository.save(patient);
 
-        return customResponse.getOkResponse("Paciente asignado a la cama correctamente");
+        return customResponse.getOkResponse("Cama asignada al paciente correctamente");
     }
+
+    @Transactional
+    public ResponseEntity<?> unassignBedFromPatient(Long patientId) {
+        Optional<PatientBean> optionalPatient = patientRepository.findById(patientId);
+
+        if (optionalPatient.isEmpty()) {
+            return customResponse.get400Response(404);
+        }
+
+        PatientBean patient = optionalPatient.get();
+        BedBean bed = patient.getBed();
+
+        if (bed == null) {
+            return customResponse.getCustomResponse("El paciente no tiene cama asignada", "ERROR", HttpStatus.CONFLICT);
+        }
+
+        bed.setPatient(null);
+        bed.setOccupied(false);
+        patient.setBed(null);
+
+        bedRepository.save(bed);
+        patientRepository.save(patient);
+
+        return customResponse.getOkResponse("Cama desasignada correctamente");
+    }
+
+
 
 
     private PatientDto toDTO(PatientBean patient) {
