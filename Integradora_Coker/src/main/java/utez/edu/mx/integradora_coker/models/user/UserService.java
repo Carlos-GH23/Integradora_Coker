@@ -93,7 +93,7 @@ public class UserService {
 
         UserBean savedUser = userRepository.save(user);
 
-        return customResponse.getCreatedResponse("Usuario creado exitosamente");
+        return customResponse.getOkResponse(savedUser);
     }
 
     // Actualizar un usuario

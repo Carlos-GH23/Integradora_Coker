@@ -16,7 +16,7 @@ public class PatientAssignmentDto {
         return patientId;
     }
 
-    public void getPatientId(Long userId) {
-        this.patientId = userId;
+    public void setPatientId(Long patientId) {
+        this.patientId = patientId;
     }
 }

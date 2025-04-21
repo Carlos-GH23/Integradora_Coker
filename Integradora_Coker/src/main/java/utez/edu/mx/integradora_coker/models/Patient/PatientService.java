@@ -48,7 +48,7 @@ public class PatientService {
     public ResponseEntity<?> createPatient(PatientDto patientDto) {
         PatientBean patient = patientDto.toEntity();
         PatientBean savedPatient = patientRepository.save(patient);
-        return customResponse.getCreatedResponse("Paciente creado de forma exitosa");
+        return customResponse.getOkResponse(patient);
     }
 
     // Update a patient
