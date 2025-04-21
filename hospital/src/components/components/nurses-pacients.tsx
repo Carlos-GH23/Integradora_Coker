@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react";
 import { Bed, Patient, User } from "../models/UserModels";
 import { AdminServices } from "../services/Services";
-import { select } from "framer-motion/client";
 import ModalForm from "../custom/ModalForm";
 import AlertMessage from "../custom/AlertMessage";
 import ErrorMessage from "../custom/ErrorMessage";
 import SuccessMessage from "../custom/SuccessMessage";
+import { getUser, isNurse } from "../services/LoginServices";
 
 function Tablepacients() {
     const [loading, setLoading] = useState(true);
@@ -215,6 +215,7 @@ function Tablepacients() {
                 validateForm={validateForm}
                 title={isEdit ? "Editar Paciente" : "Registrar Paciente"}
                 textActionOk={isEdit ? "Actualizar" : "Guardar"}
+                isSave={true}
                 body={
                     <>
                         <div>
@@ -245,7 +246,21 @@ function Tablepacients() {
                             >
                                 <option value="">Asignar cama</option>
                                 {beds
-                                    .filter((bed) => !bed.occupied || bed.id === formData.bed.id) // permitir ver su propia cama
+                                    .filter((bed) => {
+                                        console.log("isNurse(): ", isNurse());
+                                        // Mostrar su propia cama en edición, siempre
+                                        if (bed.id === formData.bed.id) return true;
+                                    
+                                        // Si no es secretaria, mostrar todas las camas no ocupadas
+                                        if (!isNurse()) return !bed.occupied;
+                                    
+                                        // Si es secretaria, filtrar camas por nombre del paciente (si tiene uno)
+                                        if (bed.user && bed.user.fullName.toLowerCase().includes((getUser()?.name ?? "").toLowerCase())) {
+                                            return true;
+                                        }
+                                    
+                                        return false;
+                                    })
                                     .map((bed) => (
                                         <option key={bed.id} value={bed.id}>
                                             {bed.identifier}

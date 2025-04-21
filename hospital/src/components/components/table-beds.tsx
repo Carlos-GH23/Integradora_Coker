@@ -89,9 +89,8 @@ const ListBeds = () => {
     // Filtra pisos cuando se selecciona una enfermera
     useEffect(() => {
         if (formData.user?.id) {
-            console.log("Enfermera seleccionada:", formData.user);
-            console.log("Enfermera seleccionada:", formData.user.floorId);
             const nurseFloorId = formData.user.floorId;
+            formData.floor.id = nurseFloorId ?? 0;
             const floorMatch = floors.filter(f => f.id === nurseFloorId);
             setFilteredFloors(floorMatch);
         } else {
@@ -234,7 +233,7 @@ const ListBeds = () => {
                                 <td className="px-6 py-4">{bed.user?.fullName ?? "Sin asignar"}</td>
                                 <td className="px-6 py-4">{bed.floor?.identifier}</td>
                                 <td className="px-6 py-4">{bed.occupied ? "Ocupada" : "Disponible"}</td>
-                                {isSecretary() || isAdmin() && (
+                                {(isSecretary() || isAdmin()) && (
                                     <td className="px-6 py-4 flex space-x-2">
                                         <button className="w-10 h-10 flex items-center justify-center bg-blue-500 text-white rounded-full hover:bg-blue-600 transition cursor-pointer"
                                             onClick={() => {
@@ -252,11 +251,14 @@ const ListBeds = () => {
                                         >
                                             <FaPen size={18} />
                                         </button>
-                                        <button
-                                            className="w-10 h-10 flex items-center justify-center bg-red-500 text-white rounded-full hover:bg-red-700 transition cursor-pointer"
-                                            onClick={() => handleDelete(bed)}>
-                                            <FaTrash size={18} />
-                                        </button>
+                                        {isAdmin() && (
+                                            <button
+                                                className="w-10 h-10 flex items-center justify-center bg-red-500 text-white rounded-full hover:bg-red-700 transition cursor-pointer"
+                                                onClick={() => handleDelete(bed)}>
+                                                <FaTrash size={18} />
+                                            </button>
+                                        )}
+                                        
                                     </td>
                                 )}
                             </tr>
@@ -281,6 +283,7 @@ const ListBeds = () => {
                 validateForm={validateForm}
                 title={isEdit ? "Editar Camilla" : "Registrar Camilla"}
                 textActionOk={isEdit ? "Actualizar" : "Guardar"}
+                isSave={true}
                 body={
                     <>
                         <div>

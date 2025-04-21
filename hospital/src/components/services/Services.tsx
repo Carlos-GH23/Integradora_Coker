@@ -34,7 +34,7 @@ export class AdminServices<T> {
 
     async createNurse(data: T): Promise<T> {
         try {
-            return axios.post(`${API_URL}create/NURSE`,data, this.getHeaders()).then(res => res.data);
+            return axios.post(`${API_URL}create/NURSE`,data, this.getHeaders()).then(res => res.data.data);
         } catch (error) {
             console.error("Error al obtener los datos:", error);
             throw error;

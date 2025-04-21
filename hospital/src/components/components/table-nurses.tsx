@@ -102,7 +102,7 @@ const ListNurses = () => {
             }
         }
         
-        if (formData.floor === undefined || formData.floor === null || formData.floor.id === 0) newErrors.floor = "El piso es obligatorio";
+        if (formData.floorId === undefined || formData.floorId === null || formData.floorId === 0) newErrors.floor = "El piso es obligatorio";
     
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
@@ -111,25 +111,26 @@ const ListNurses = () => {
     const handleSubmit = async () => {
         setErrorMessage("");
         try {
+            let idUser = 0;
             const editNewNurse = {
                 fullName: formData.fullName,
                 email: formData.email,
                 phoneNumber: formData.phoneNumber,
                 username: formData.username,
                 floor: {
-                    id: formData.floor.id,
-                    identifier: formData.floor.identifier,
+                    id: formData.floorId,
                 },
                 password: formData.password,
             };
             if (!isEdit) {
-                await Service.createNurse(editNewNurse as User);
+                const createdResponse = await Service.createNurse(editNewNurse as User);
+                idUser = createdResponse.id;
             } else {
                 await Service.updateNurse(formData.id, editNewNurse as User);
             }
             const asignFloor = {
-                userId: formData.id,
-                floorId: formData.floor.id,
+                userId: isEdit ? formData.id : idUser,
+                floorId: formData.floorId,
             };
             await Service.floorNurse(asignFloor)
             setSuccessMessage(isEdit ? "Enfermero(o) editada exitosamente" : "Enfermero(o) creada exitosamente");
@@ -228,38 +229,35 @@ const ListNurses = () => {
                                         ?? "Sin asignación"
                                     }
                                 </td>
-                                {isAdmin() && (
-                                    <td className="px-6 py-4 flex space-x-2">
-                                        <button className="w-10 h-10 flex items-center justify-center bg-blue-500 text-white rounded-full hover:bg-blue-600 transition cursor-pointer"
-                                            onClick={() => { setFormData(nurse); toggleModalForm(); }}
-                                        >
-                                            <FaPen size={18} />
-                                        </button>
+                                <td className="px-6 py-4 flex space-x-2">
+                                    <button className="w-10 h-10 flex items-center justify-center bg-blue-500 text-white rounded-full hover:bg-blue-600 transition cursor-pointer"
+                                        onClick={() => { setFormData(nurse); toggleModalForm(); }}
+                                    >
+                                        <FaPen size={18} />
+                                    </button>
+                                    {isAdmin() && (
                                         <button
                                             className="w-10 h-10 flex items-center justify-center bg-red-500 text-white rounded-full hover:bg-red-700 transition cursor-pointer"
                                             onClick={() => handleDelete(nurse)}
                                         >
                                             <FaTrash size={18} />
                                         </button>
-                                    </td>
-                                )}
-
+                                    )}
+                                    
+                                </td>
                             </tr>
                         ))}
                     </tbody>
                 </DataTable>
             </div>
-
-            {isAdmin() && (
-                <button className="fixed bottom-6 right-6 bg-green-600 text-white p-4 rounded-full shadow-lg hover:bg-green-700 transition"
-                    onClick={() => {
-                        setFormData({ id: 0, fullName: "", email: "", phoneNumber: "", username: "", password: "", floor: {id: 0, identifier: "", bednumber: 0} });
-                        toggleModalForm();
-                    }}
-                >
-                    <FaPlus size={24} />
-                </button>
-            )}
+            <button className="fixed bottom-6 right-6 bg-green-600 text-white p-4 rounded-full shadow-lg hover:bg-green-700 transition"
+                onClick={() => {
+                    setFormData({ id: 0, fullName: "", email: "", phoneNumber: "", username: "", password: "", floor: {id: 0, identifier: "", bednumber: 0}, });
+                    toggleModalForm();
+                }}
+            >
+                <FaPlus size={24} />
+            </button>
 
             <ModalForm
                 isOpen={viewModalForm}
@@ -268,6 +266,7 @@ const ListNurses = () => {
                 validateForm={validateForm}
                 title={isEdit ? "Editar Enfermera" : "Registrar Enfermera"}
                 textActionOk={isEdit ? "Actualizar" : "Guardar"}
+                isSave={true}
                 body={
                     <>
                     <div className="grid grid-cols-5 gap-4">
