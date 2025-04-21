@@ -1,16 +1,39 @@
 package utez.edu.mx.integradora_coker.models.user;
 
 
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
+
 public class UserDto {
+
     private Long id;
+
+    @NotNull(message = "El nombre completo no puede ser nulo")
+    @Size(min = 3, max = 100, message = "El nombre completo debe tener entre 3 y 100 caracteres")
     private String fullName;
+
+    @NotNull(message = "El correo electrónico no puede ser nulo")
+    @Email(message = "El correo electrónico no tiene un formato válido")
     private String email;
+
+    @Pattern(regexp = "^\\+?[0-9]{10,15}$", message = "El número de teléfono debe ser válido y contener entre 10 y 15 dígitos")
     private String phoneNumber;
+
+    @NotNull(message = "El nombre de usuario no puede ser nulo")
+    @Size(min = 3, max = 50, message = "El nombre de usuario debe tener entre 3 y 50 caracteres")
+    @Pattern(regexp = "^[a-zA-Z0-9_]+$", message = "El nombre de usuario solo puede contener letras, números y guiones bajos")
     private String username;
+
+    @NotNull(message = "La contraseña no puede ser nula")
+    @Size(min = 8, message = "La contraseña debe tener al menos 8 caracteres")
+    @Pattern(regexp = "(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z]).{8,}", message = "La contraseña debe tener al menos 8 caracteres, con al menos una letra mayúscula, una minúscula y un número")
     private String password;
+
+    @NotNull(message = "El rol no puede ser nulo")
     private String roleName;
 
-    // Getters y Setters
     public Long getId() {
         return id;
     }
@@ -67,7 +90,6 @@ public class UserDto {
         this.roleName = roleName;
     }
 
-    // Convertir de UserBean a UserDto
     public static UserDto fromEntity(UserBean user) {
         UserDto dto = new UserDto();
         dto.setId(user.getId());
@@ -80,7 +102,6 @@ public class UserDto {
         return dto;
     }
 
-    // Convertir de UserDto a UserBean
     public UserBean toEntity() {
         UserBean user = new UserBean();
         user.setId(this.id);

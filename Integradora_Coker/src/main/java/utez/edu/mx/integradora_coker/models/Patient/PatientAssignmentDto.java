@@ -12,11 +12,11 @@ public class PatientAssignmentDto {
         this.bedId = bedId;
     }
 
-    public Long getUserId() {
+    public Long getPatientId() {
         return patientId;
     }
 
-    public void setUserId(Long userId) {
+    public void getPatientId(Long userId) {
         this.patientId = userId;
     }
 }

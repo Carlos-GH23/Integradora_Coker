@@ -54,22 +54,22 @@ public class BedService {
     public ResponseEntity<?> createBed(BedDto bedDto) {
         Optional<FloorBean> floor = floorRepository.findById(bedDto.getFloor().getId());
         if (!floor.isPresent()) {
-            return customResponse.get400Response(404);
+            return customResponse.getCustomResponse("Ya existe esta cama", "ERROR", HttpStatus.BAD_REQUEST);
         }
 
         if (floor.get().getBeds().size() >= floor.get().getBednumber()) {
             return customResponse.getCustomResponse("No se pueden agregar más camas. El límite es " + floor.get().getBednumber(),"ERROR",HttpStatus.CONFLICT);
         }
 
-        // 3. Validar identificador único en el piso
         if (bedRepository.existsByIdentifierAndFloorId(
                 bedDto.getIdentifier(),
                 floor.get().getId())) {
-            return customResponse.get400Response(409);
+            return customResponse.getCustomResponse("No se puede repetir el identificador en este piso", "ERROR", HttpStatus.BAD_REQUEST);
+
         }
 
-        // 4. Crear entidad de cama
         BedBean bed = new BedBean();
+        bed.setOccupied(bedDto.getPatient() != null);
         bed.setIdentifier(bedDto.getIdentifier());
         bed.setFloor(floor.get());
 
@@ -86,7 +86,6 @@ public class BedService {
         if (existingBed.isPresent()) {
             BedBean bed = existingBed.get();
 
-            // Update only if values are not null
             if (bedDto.getIdentifier() != null) bed.setIdentifier(bedDto.getIdentifier());
             if (bedDto.getUser() != null) bed.setUser(bedDto.getUser());
             if (bedDto.getPatient() != null) bed.setPatient(bedDto.getPatient());
@@ -99,7 +98,7 @@ public class BedService {
             BedBean updatedBed = bedRepository.save(bed);
             return customResponse.getOkResponse(toDTO(updatedBed));
         } else {
-            return customResponse.get400Response(404);
+            return customResponse.getCustomResponse("Error al actualizar", "ERROR", HttpStatus.BAD_REQUEST);
         }
     }
 

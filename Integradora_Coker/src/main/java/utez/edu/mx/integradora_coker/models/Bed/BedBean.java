@@ -15,6 +15,7 @@ public class BedBean {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String identifier;
+    private boolean occupied;
 
     @ManyToOne
     @JoinColumn(name = "floor_id")
@@ -50,15 +51,20 @@ public class BedBean {
         this.id = id;
     }
 
+    public boolean isOccupied() {return occupied;}
+
+    public void setOccupied(boolean occupied) {this.occupied = occupied;}
+
     public BedBean() {
     }
 
-    public BedBean(Long id, PatientBean patient, UserBean user, FloorBean floor, String identifier) {
+    public BedBean(Long id, PatientBean patient, UserBean user, FloorBean floor, String identifier, boolean occupied) {
         this.id = id;
         this.patient = patient;
         this.user = user;
         this.floor = floor;
         this.identifier = identifier;
+        this.occupied = occupied;
     }
 
     public Long getId() {

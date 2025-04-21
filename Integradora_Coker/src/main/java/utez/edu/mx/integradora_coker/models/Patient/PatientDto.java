@@ -1,11 +1,21 @@
 package utez.edu.mx.integradora_coker.models.Patient;
 
-
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 import utez.edu.mx.integradora_coker.models.Bed.BedBean;
 
 public class PatientDto {
     private Long id;
+
+    @NotBlank(message = "El nombre completo no puede estar vacío")
+    @Size(min = 2, max = 100, message = "El nombre debe tener entre 2 y 100 caracteres")
+    @Pattern(
+            regexp = "^[A-Za-zÁÉÍÓÚáéíóúÑñ ]+$",
+            message = "El nombre solo puede contener letras y espacios"
+    )
     private String fullName;
+
     private BedBean bed;
 
     // Getters and Setters
@@ -33,7 +43,6 @@ public class PatientDto {
         this.bed = bed;
     }
 
-    // Convert from PatientBean to PatientDto
     public static PatientDto fromEntity(PatientBean patient) {
         PatientDto dto = new PatientDto();
         dto.setId(patient.getId());
@@ -42,7 +51,6 @@ public class PatientDto {
         return dto;
     }
 
-    // Convert from PatientDto to PatientBean
     public PatientBean toEntity() {
         PatientBean patient = new PatientBean();
         patient.setId(this.id);
