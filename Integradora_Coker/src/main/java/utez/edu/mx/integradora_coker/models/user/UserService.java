@@ -12,7 +12,8 @@ import utez.edu.mx.integradora_coker.models.Role.RoleBean;
 import utez.edu.mx.integradora_coker.models.Role.RoleRepository;
 import utez.edu.mx.integradora_coker.models.floor.FloorBean;
 import utez.edu.mx.integradora_coker.models.floor.FloorRepository;
-
+import org.jsoup.Jsoup;
+import org.jsoup.safety.Safelist;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -71,42 +72,75 @@ public class UserService {
 
     @Transactional
     public ResponseEntity<?> createUserWithRole(UserDto userDto, String roleName) {
-        Set<String> allowedRoles = Set.of( "SECRETARY", "NURSE");
+        try {
+            Set<String> allowedRoles = Set.of("SECRETARY", "NURSE");
+            String normalizedRoleName = roleName.toUpperCase();
 
-        String normalizedRoleName = roleName.toUpperCase();
+            if (!allowedRoles.contains(normalizedRoleName)) {
+                return customResponse.get400Response(400);
+            }
 
-        if (!allowedRoles.contains(normalizedRoleName)) {
-            return customResponse.get400Response(400);
+            Optional<RoleBean> roleOpt = roleRepository.findByName(normalizedRoleName);
+            if (roleOpt.isEmpty()) {
+                return customResponse.get400Response(404);
+            }
+
+            userDto.setFullName(sanitizeInput(userDto.getFullName()));
+            userDto.setEmail(sanitizeInput(userDto.getEmail()));
+            userDto.setPhoneNumber(sanitizeInput(userDto.getPhoneNumber()));
+            userDto.setUsername(sanitizeInput(userDto.getUsername()));
+
+            String encryptedPassword = passwordEncoder.encode(userDto.getPassword());
+            userDto.setPassword(encryptedPassword);
+
+            UserBean user = userDto.toEntity();
+            user.setRole(roleOpt.get());
+
+            UserBean savedUser = userRepository.save(user);
+            return customResponse.getOkResponse(savedUser);
+        } catch (IllegalArgumentException e) {
+            return customResponse.getCustomResponse(
+                    "Contenido no permitido en los campos: " + e.getMessage(),
+                    "ERROR",
+                    HttpStatus.BAD_REQUEST
+            );
         }
-
-        // Buscar el rol en la base de datos
-        Optional<RoleBean> roleOpt = roleRepository.findByName(normalizedRoleName);
-        if (roleOpt.isEmpty()) {
-            return customResponse.get400Response(404);
-        }
-        String encryptedPassword = passwordEncoder.encode(userDto.getPassword());
-
-        userDto.setPassword(encryptedPassword);
-
-        UserBean user = userDto.toEntity();
-        user.setRole(roleOpt.get());
-
-        UserBean savedUser = userRepository.save(user);
-
-        return customResponse.getOkResponse(savedUser);
     }
 
-    // Actualizar un usuario
     @Transactional
     public ResponseEntity<?> updateUser(Long id, UserDto userDto) {
-        Optional<UserBean> existingUser = userRepository.findById(id);
-        if (existingUser.isPresent()) {
+        try {
+            // Validar que el DTO no sea nulo
+            if (userDto == null) {
+                return customResponse.getCustomResponse(
+                        "Los datos del usuario no pueden ser nulos",
+                        "ERROR",
+                        HttpStatus.BAD_REQUEST);
+            }
+
+            Optional<UserBean> existingUser = userRepository.findById(id);
+            if (!existingUser.isPresent()) {
+                return customResponse.get400Response(404);
+            }
+
             UserBean user = existingUser.get();
 
-            if (userDto.getFullName() != null) user.setFullName(userDto.getFullName());
-            if (userDto.getEmail() != null) user.setEmail(userDto.getEmail());
-            if (userDto.getPhoneNumber() != null) user.setPhoneNumber(userDto.getPhoneNumber());
-            if (userDto.getUsername() != null) user.setUsername(userDto.getUsername());
+            // Sanitizar y validar cada campo
+            if (userDto.getFullName() != null) {
+                user.setFullName(sanitizeInput(userDto.getFullName()));
+            }
+
+            if (userDto.getEmail() != null) {
+                user.setEmail(sanitizeInput(userDto.getEmail()));
+            }
+
+            if (userDto.getPhoneNumber() != null) {
+                user.setPhoneNumber(sanitizeInput(userDto.getPhoneNumber()));
+            }
+
+            if (userDto.getUsername() != null) {
+                user.setUsername(sanitizeInput(userDto.getUsername()));
+            }
 
             if (userDto.getPassword() != null) {
                 String encryptedPassword = passwordEncoder.encode(userDto.getPassword());
@@ -115,8 +149,12 @@ public class UserService {
 
             UserBean updatedUser = userRepository.save(user);
             return customResponse.getOkResponse(toDTO(updatedUser));
-        } else {
-            return customResponse.get400Response(404);
+
+        } catch (IllegalArgumentException e) {
+            return customResponse.getCustomResponse(
+                    "Error en los datos del usuario: " + e.getMessage(),
+                    "ERROR",
+                    HttpStatus.BAD_REQUEST);
         }
     }
 
@@ -211,6 +249,22 @@ public class UserService {
         return UserDto.fromEntity(user);
     }
 
+    private String sanitizeInput(String input) throws IllegalArgumentException {
+        if (input == null) return null;
+        if (containsMaliciousContent(input)) {
+            throw new IllegalArgumentException("El campo contiene contenido no permitido");
+        }
+        return Jsoup.clean(input, Safelist.basic());
+    }
+
+    private boolean containsMaliciousContent(String input) {
+        if (input == null) return false;
+        String clean = Jsoup.clean(input, Safelist.none());
+        return !clean.equals(input) ||
+                input.matches(".*<[^>]+>.*") ||
+                input.matches(".*javascript:.*") ||
+                input.matches(".*\\b(onload|onerror|onclick)\\b.*");
+    }
 }
 
 
