@@ -5,7 +5,6 @@ const SuccessMessage = ({ message }: { message: string }) => {
     const [visible, setVisible] = useState(false);
 
     useEffect(() => {
-        console.log('message: ', message)
         if (message) {
             setVisible(true);
             const timer = setTimeout(() => setVisible(false), 5000);

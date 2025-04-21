@@ -13,6 +13,7 @@ export class AdminServices<T> {
         this.token = localStorage.getItem("token");
     }
 
+    //ENFERMERAS
     private getHeaders() {
         return {
             headers: {
@@ -28,7 +29,7 @@ export class AdminServices<T> {
             console.error("Error al obtener los datos:", error);
             throw error;
         }
-    }
+    }//EXITO
 
     async createNurse(data: T): Promise<T> {
         try {
@@ -37,7 +38,7 @@ export class AdminServices<T> {
             console.error("Error al obtener los datos:", error);
             throw error;
         }
-    }
+    }//EXITO
 
     async deleteNurse(id: number): Promise<void> {
         try {
@@ -46,7 +47,8 @@ export class AdminServices<T> {
             console.error("Error al obtener los datos:", error);
             throw error;
         }
-    }
+    }//EXITO
+
     async updateNurse(id: number, data: Partial<T>): Promise<T> {
         try {
             return axios.put<T>(`${API_URL}${id}`,data, this.getHeaders()).then(res => res.data);
@@ -54,9 +56,18 @@ export class AdminServices<T> {
             console.error("Error al obtener los datos:", error);
             throw error;
         }
-    }
-    
+    }//EXITO
 
+    async floorNurse(data: any): Promise<T> {
+        try {
+            return axios.post(`${API_URL}assign-floor`,data, this.getHeaders()).then(res => res.data);
+        } catch (error) {
+            console.error("Error al obtener los datos:", error);
+            throw error;
+        }
+    }
+
+    //SECRETARIAS
     async getAllSecretary(): Promise<{data: User[]}> {
         try {
             return axios.get<{ data: User[] }>(`${API_URL}Secretarias`, this.getHeaders()).then(res => res.data);
@@ -64,7 +75,7 @@ export class AdminServices<T> {
             console.error("Error al obtener los datos:", error);
             throw error;
         }
-    }
+    }//EXITO
 
     async createSecretary(data: T): Promise<T> {
         try {
@@ -73,16 +84,16 @@ export class AdminServices<T> {
             console.error("Error al obtener los datos:", error);
             throw error;
         }
-    }
+    }//EXITO
 
     async deleteSecretary(id: number): Promise<void> {
         try {
-            return axios.post(`${API_URL}${id}`, this.getHeaders()).then(res => res.data);
+            return axios.delete(`${API_URL}${id}`, this.getHeaders()).then(res => res.data);
         } catch (error) {
             console.error("Error al obtener los datos:", error);
             throw error;
         }
-    }
+    }//EXITO
 
     async updateSecretary(id: number, data: Partial<T>): Promise<T> {
         try {
@@ -91,8 +102,18 @@ export class AdminServices<T> {
             console.error("Error al obtener los datos:", error);
             throw error;
         }
-    }
+    }//EXITO
 
+    async floorSecretary(data: any): Promise<T> {
+        try {
+            return axios.post(`${API_URL}assign-floor`,data, this.getHeaders()).then(res => res.data);
+        } catch (error) {
+            console.error("Error al obtener los datos:", error);
+            throw error;
+        }
+    }//EXITO
+
+    //PISOS
     async getAllFloor(): Promise<{data: Floor[]}> {
         try {
             return axios.get<{ data: Floor[] }>(`${API}`, this.getHeaders()).then(res => res.data);
@@ -100,7 +121,7 @@ export class AdminServices<T> {
             console.error("Error al obtener los datos:", error);
             throw error;
         }
-    }
+    }//EXITO
 
     async createFloor(data: T): Promise<T> {
         try {
@@ -109,16 +130,16 @@ export class AdminServices<T> {
             console.error("Error al obtener los datos:", error);
             throw error;
         }
-    }
+    }//EXITO
 
     async deleteFloor(id: number): Promise<void> {
         try {
-            return axios.post(`${API}/delete${id}`, this.getHeaders()).then(res => res.data);
+            return axios.delete(`${API}/delete/${id}`, this.getHeaders()).then(res => res.data);
         } catch (error) {
             console.error("Error al obtener los datos:", error);
             throw error;
         }
-    }
+    }//EXITO
 
     async updateFloor(id: number, data: Partial<T>): Promise<T> {
         try {
@@ -127,8 +148,9 @@ export class AdminServices<T> {
             console.error("Error al obtener los datos:", error);
             throw error;
         }
-    }
+    }//EXITO
 
+    //CAMAS
     async getAllBeds(): Promise<{data: Bed[]}> {
         try {
             return axios.get<{ data: Bed[] }>(`${API_B}`, this.getHeaders()).then(res => res.data);
@@ -158,12 +180,14 @@ export class AdminServices<T> {
 
     async deleteBed(id: number): Promise<void> {
         try {
-            return axios.post(`${API_B}/delete${id}`, this.getHeaders()).then(res => res.data);
+            return axios.delete(`${API_B}/delete/${id}`, this.getHeaders()).then(res => res.data);
         } catch (error) {
             console.error("Error al obtener los datos:", error);
             throw error;
         }
     }
 
+    //PACIENTES
+    
 }
 

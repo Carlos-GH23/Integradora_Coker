@@ -9,6 +9,7 @@ import { IoBedSharp } from "react-icons/io5";
 import { HiChevronLeft, HiChevronRight } from "react-icons/hi";
 import { HiArrowLeftOnRectangle } from "react-icons/hi2";
 import { getUser, logout } from "../services/LoginServices";
+import { MdSick } from "react-icons/md";
 
 function MenuTop({ user }: { user: string }) {
 
@@ -50,6 +51,7 @@ function MenuTop({ user }: { user: string }) {
         { name: "Enfermeras", path: "enfermeras", icon: <FaUserNurse size={30} /> },
         { name: "Pisos", path: "pisos", icon: <GiFlatPlatform size={30} /> },
         { name: "Camas", path: "camas", icon: <IoBedSharp size={30} /> },
+        { name: "Pacientes", path: "pacientes", icon: <MdSick size={30} /> },
     ]
 
     if (user === "nurse") {
