@@ -51,15 +51,15 @@ public class MainSecurity implements WebMvcConfigurer {
                         .requestMatchers("/api/patients/unassign-bed/**").hasAnyRole("NURSE", "SECRETARY")
 
 
-                        .requestMatchers(HttpMethod.GET, "/api/beds/**").hasAnyRole("SECRETARY", "NURSE")
-                        .requestMatchers(HttpMethod.POST, "/api/beds/**").hasRole("SECRETARY")
-                        .requestMatchers(HttpMethod.PUT, "/api/beds/**").hasRole("SECRETARY")
-                        .requestMatchers(HttpMethod.DELETE, "/api/beds/**").hasRole("SECRETARY")
+                        .requestMatchers(HttpMethod.GET, "/api/beds/**").hasAnyRole("SECRETARY", "NURSE", "ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/api/beds/**").hasAnyRole("SECRETARY", "ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/api/beds/**").hasAnyRole("SECRETARY", "ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/api/beds/**").hasAnyRole("SECRETARY", "ADMIN")
 
-                        .requestMatchers(HttpMethod.GET, "/api/patients/**").hasRole("NURSE")
-                        .requestMatchers(HttpMethod.POST, "/api/patients/**").hasRole("NURSE")
-                        .requestMatchers(HttpMethod.PUT, "/api/patients/**").hasRole("NURSE")
-                        .requestMatchers(HttpMethod.DELETE, "/api/patients/**").hasRole("NURSE")
+                        .requestMatchers(HttpMethod.GET, "/api/patients/**").hasAnyRole("NURSE", "ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/api/patients/**").hasAnyRole("NURSE", "ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/api/patients/**").hasAnyRole("NURSE", "ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/api/patients/**").hasAnyRole("NURSE", "ADMIN")
 
 
                         .requestMatchers("/api/users/assign-floor", "/api/users/unassign-floor/**","/api/users/create/NURSE").hasAnyRole("ADMIN", "SECRETARY")
