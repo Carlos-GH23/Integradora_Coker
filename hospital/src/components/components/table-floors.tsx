@@ -9,12 +9,13 @@ import AlertMessage from '../custom/AlertMessage';
 import ModalForm from '../custom/ModalForm';
 import SuccessMessage from '../custom/SuccessMessage';
 import { isAdmin } from '../services/LoginServices';
+import { a } from 'framer-motion/client';
 
 DataTable.use(DT);
 const ListFloor = () => {
     const [loading, setLoading] = useState(true);
     const [floors, setfloors] = useState<Floor[]>([]);
-    const [formData, setFormData] = useState<Floor>({ id: 0, identifier: "" });
+    const [formData, setFormData] = useState<Floor>({ id: 0, identifier: "", bednumber: 0 });
 
     const [viewModalForm, setViewModalForm] = useState(false);
     const [selectedFloor, setSelectedFloor] = useState<Floor | null>(null);
@@ -23,7 +24,7 @@ const ListFloor = () => {
     const [successMessage, setSuccessMessage] = useState("");
 
     const Service = new AdminServices<Floor>();
-    const [errors, setErrors] = useState<{ identifier?: string;}>({});
+    const [errors, setErrors] = useState<{ identifier?: string; bednumber?: string }>({});
     const isEdit = formData.id !== 0;
 
     const fetchfloor = async () => {
@@ -45,7 +46,7 @@ const ListFloor = () => {
     }, []);
 
     const validateForm = () => {
-        let newErrors: { identifier?: string } = {};
+        let newErrors: { identifier?: string, bednumber?: string} = {};
         const regex = /^[a-zA-Z0-9\s]+$/;
     
         if (!formData.identifier.trim()) {
@@ -53,7 +54,10 @@ const ListFloor = () => {
         } else if (!regex.test(formData.identifier)) {
             newErrors.identifier = "El nombre no debe contener caracteres especiales";
         }
-    
+        if (!formData.bednumber || isNaN(Number(formData.bednumber)) || Number(formData.bednumber) <= 0) {
+            newErrors.bednumber = "Debe ingresar una cantidad válida mayor a 0";
+        }
+
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
     };
@@ -64,6 +68,7 @@ const ListFloor = () => {
         try {
             const editNewFloor = {
                 identifier: formData.identifier,
+                bednumber: formData.bednumber,
             };
             if (!isEdit) {
                 await Service.createFloor(editNewFloor as Floor)
@@ -89,7 +94,7 @@ const ListFloor = () => {
         setErrorMessage("");
         try {
             if (selectedFloor) {
-                await Service.deleteFloor(formData.id)
+                await Service.deleteFloor(selectedFloor.id)
                 setSuccessMessage("Eliminación exitosa");
                 fetchfloor();
             }
@@ -140,6 +145,7 @@ const ListFloor = () => {
                         <tr className="bg-gray-100 text-gray-700 text-left">
                             <th className="px-6 py-3">ID</th>
                             <th className="px-6 py-3">Piso</th>
+                            <th className="px-6 py-3">Número de Camas</th>
                             {isAdmin() && <th className="px-6 py-3">Acciones</th>}
                         </tr>
                     </thead>
@@ -149,6 +155,7 @@ const ListFloor = () => {
                             <tr key={Floor.id} className="border-b hover:bg-gray-50 transition">
                                 <td className="px-6 py-4">{Floor.id}</td>
                                 <td className="px-6 py-4">{Floor.identifier}</td>
+                                <td className="px-6 py-4">{Floor.bednumber}</td>
                                 {isAdmin() && (
                                     <td className="px-6 py-4 flex space-x-2">
                                         <button 
@@ -172,7 +179,7 @@ const ListFloor = () => {
 
             <button className="fixed bottom-6 right-6 bg-green-600 text-white p-4 rounded-full shadow-lg hover:bg-green-700 transition"
                 onClick={() => {
-                    setFormData({ id: 0, identifier: "",});
+                    setFormData({ id: 0, identifier: "", bednumber: 0 });
                     toggleModalForm();
                 }}>
                 <FaPlus size={24} />
@@ -196,6 +203,17 @@ const ListFloor = () => {
                                 className="w-full p-3 border border-gray-300 rounded-lg"
                             />
                             {errors.identifier && <p className="text-red-500 text-sm">{errors.identifier}</p>}
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium">Número de camas</label>
+                            <input
+                                type="number"
+                                value={formData.bednumber}
+                                min={1}
+                                onChange={(e) => handleChange("bednumber", e.target.value)}
+                                className="w-full p-3 border border-gray-300 rounded-lg"
+                            />
+                            {errors.bednumber && <p className="text-red-500 text-sm">{errors.bednumber}</p>}
                         </div>
                     </>
                 }

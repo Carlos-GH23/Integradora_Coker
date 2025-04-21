@@ -16,7 +16,6 @@ const AlertMessage: React.FC<AlertMessageProps> = ({ title, colorTitle = "#FF333
     const [visible, setVisible] = useState(false);
 
     useEffect(() => {
-        console.log('body: ', body)
         if (body) {
             setVisible(true);
         }

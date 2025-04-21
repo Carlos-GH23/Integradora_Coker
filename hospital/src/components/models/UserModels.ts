@@ -5,11 +5,15 @@ export interface User {
     phoneNumber: string;
     username: string;
     password: string;
+    floor: Floor;
+    floorId?: number;
 }
 
 export interface Floor {
     id: number;
     identifier: string;
+    bednumber: number;
+    occupied?: number;
 }
 
 export interface Patient {

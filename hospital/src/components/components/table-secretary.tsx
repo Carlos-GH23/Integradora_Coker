@@ -2,18 +2,19 @@ import { useEffect, useState } from 'react';
 import DataTable from 'datatables.net-react';
 import DT from 'datatables.net-dt';
 import { FaPen, FaPlus, FaTrash } from 'react-icons/fa';
-import { User } from '../models/UserModels';
+import { Floor, User } from '../models/UserModels';
 import { AdminServices } from '../services/Services';
 import AlertMessage from '../custom/AlertMessage';
 import ErrorMessage from '../custom/ErrorMessage';
 import SuccessMessage from '../custom/SuccessMessage';
 import ModalForm from '../custom/ModalForm';
+import { a } from 'framer-motion/client';
 
 DataTable.use(DT);
 const ListSecretary = () => {
     const [loading, setLoading] = useState(true);
     const [secretary, setSecretarys] = useState<User[]>([]);
-    const [formData, setFormData] = useState<User>({ id: 0, fullName: "", email: "", phoneNumber: "", username: "", password: ""});
+    const [formData, setFormData] = useState<User>({ id: 0, fullName: "", email: "", phoneNumber: "", username: "", password: "", floor: {id: 0, identifier: "", bednumber: 0}, floorId: 0 });
     
     const [viewModalForm, setViewModalForm] = useState(false);
     const [selectedSecretary, setSelectedSecretary] = useState<User | null>(null);
@@ -22,7 +23,9 @@ const ListSecretary = () => {
     const [successMessage, setSuccessMessage] = useState("");
 
     const Service = new AdminServices<User>();
-    const [errors, setErrors] = useState<{ fullName?: string; email?: string; phoneNumber?: string; username?: string; password?: string}>({});
+    const floorService = new AdminServices<Floor>();
+    const [floors, setfloors] = useState<Floor[]>([]);
+    const [errors, setErrors] = useState<{ fullName?: string; email?: string; phoneNumber?: string; username?: string; password?: string, floor?: string}>({});
     
     const isEdit = formData.id !== 0;  
 
@@ -40,12 +43,23 @@ const ListSecretary = () => {
         }
     };
 
+    const fetchFloor = async () => {
+        try {
+            const response = await floorService.getAllFloor();
+            const floorArray: Floor[] = response.data;
+            setfloors(floorArray);
+        } catch (error) {
+            console.error("Hubo un problema al cargar los pisos. Por favor, inténtalo de nuevo más tarde.");
+        }
+    };
+
     useEffect(() => {
         fetchsecretarys();
+        fetchFloor();
     }, []);
 
     const validateForm = () => {
-        let newErrors: { fullName?: string; email?: string; phoneNumber?: string; username?: string; password?: string } = {};
+        let newErrors: { fullName?: string; email?: string; phoneNumber?: string; username?: string; password?: string; floor?: string } = {};
     
         // Validar nombre completo
         const nameRegex = /^[A-Za-zÁÉÍÓÚáéíóúñÑ\s]+$/;
@@ -87,6 +101,8 @@ const ListSecretary = () => {
                 newErrors.password = "La contraseña no debe contener espacios";
             }
         }
+        
+        if (formData.floor === undefined || formData.floor === null || formData.floor.id === 0) newErrors.floor = "El piso es obligatorio";
     
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
@@ -101,17 +117,26 @@ const ListSecretary = () => {
                 phoneNumber: formData.phoneNumber,
                 username: formData.username,
                 password: formData.password,
+                floor: {
+                    id: formData.floor.id,
+                    identifier: formData.floor.identifier,
+                },
             };
-            if (formData.id === 0) {
+            if (!isEdit) {
                 await Service.createSecretary(editNewNurse as User);
-                setSuccessMessage("Secretaria(o) creada exitosamente");
             } else {
                 await Service.updateSecretary(formData.id, editNewNurse as User);
-                setSuccessMessage("Secretaria(o) editada exitosamente");
             }
+            const asignFloor = {
+                userId: formData.id,
+                floorId: formData.floor.id,
+            };
+            await Service.floorSecretary(asignFloor)
+            setSuccessMessage(isEdit ? "Secretaria(o) editada exitosamente" : "Secretaria(o) creada exitosamente");
             setAlertMessage(false);
             toggleModalForm();
             fetchsecretarys();
+            fetchFloor();
         } catch (error) {
             setErrorMessage(`${error}`);
         }
@@ -157,7 +182,6 @@ const ListSecretary = () => {
 
     return (
         <div className="pt-4 w-full ">
-
             <div className="w-full h-15 rounded-lg bg-[#34495E] text-white mb-2 flex justify-center items-center">
                 <h2 className="text-2xl font-bold text-center font-serif">Secretarias</h2>
             </div>
@@ -180,6 +204,7 @@ const ListSecretary = () => {
                             <th className="px-6 py-3">Telefono</th>
                             <th className="px-6 py-3">Correo</th>
                             <th className="px-6 py-3">Usuario</th>
+                            <th className="px-6 py-3">Piso</th>
                             <th className="px-6 py-3">Acciones</th>
                         </tr>
                     </thead>
@@ -196,6 +221,13 @@ const ListSecretary = () => {
                                     <span>{secretary.email}</span>
                                 </td>
                                 <td className="px-6 py-4">{secretary.username}</td>
+                                <td className="px-6 py-4">
+                                    {
+                                        secretary.floor?.identifier
+                                        ?? floors.find(f => f.id === (secretary as any).floorId)?.identifier
+                                        ?? "Sin asignación"
+                                    }
+                                </td>
 
                                 <td className="px-6 py-4 flex space-x-2">
                                     <button className="w-10 h-10 flex items-center justify-center bg-blue-500 text-white rounded-full hover:bg-blue-600 transition cursor-pointer"
@@ -217,7 +249,7 @@ const ListSecretary = () => {
 
             <button className="fixed bottom-6 right-6 bg-green-600 text-white p-4 rounded-full shadow-lg hover:bg-green-700 transition"
                 onClick={() => {
-                    setFormData({ id: 0, fullName: "", email: "", phoneNumber: "", username: "", password: ""});
+                    setFormData({ id: 0, fullName: "", email: "", phoneNumber: "", username: "", password: "", floor: {id: 0, identifier: "", bednumber: 0}, floorId: 0 });
                     toggleModalForm();
                 }}
             >
@@ -233,51 +265,91 @@ const ListSecretary = () => {
                 textActionOk={isEdit ? "Actualizar" : "Guardar"}
                 body={
                     <>
-                        <div>
-                            <label className="block text-sm font-medium">Nombre Completo</label>
-                            <input
-                                type="text"
-                                value={formData.fullName}
-                                onChange={(e) => handleChange("fullName", e.target.value)}
+                        <div className="grid grid-cols-5 gap-4">
+                            <div className="col-span-3">
+                                <label className="block text-sm font-medium">Nombre Completo</label>
+                                <input
+                                    type="text"
+                                    value={formData.fullName}
+                                    onChange={(e) => handleChange("fullName", e.target.value)}
+                                    className="w-full p-3 border border-gray-300 rounded-lg"
+                                />
+                                {errors.fullName && <p className="text-red-500 text-sm">{errors.fullName}</p>}
+                            </div>
+
+                            <div className="col-span-2">
+                                <label className="block text-sm font-medium">Usuario</label>
+                                <input
+                                    type="text"
+                                    value={formData.username}
+                                    onChange={(e) => handleChange("username", e.target.value)}
+                                    className="w-full p-3 border border-gray-300 rounded-lg"
+                                />
+                                {errors.username && <p className="text-red-500 text-sm">{errors.username}</p>}
+                            </div>
+
+                            <div className="col-span-3">
+                                <label className="block text-sm font-medium">Correo</label>
+                                <input
+                                    type="email"
+                                    value={formData.email}
+                                    onChange={(e) => handleChange("email", e.target.value)}
+                                    className="w-full p-3 border border-gray-300 rounded-lg"
+                                />
+                                {errors.email && <p className="text-red-500 text-sm">{errors.email}</p>}
+                            </div>
+
+                            <div className="col-span-2">
+                                <label className="block text-sm font-medium">Teléfono</label>
+                                <input
+                                    type="text"
+                                    value={formData.phoneNumber}
+                                    onChange={(e) => handleChange("phoneNumber", e.target.value)}
+                                    maxLength={10}
+                                    inputMode="numeric"
+                                    pattern="\d*"
+                                    className="w-full p-3 border border-gray-300 rounded-lg"
+                                />
+                                {errors.phoneNumber && <p className="text-red-500 text-sm">{errors.phoneNumber}</p>}
+                            </div>
+                        </div>
+
+                        <div className="mt-4">
+                            <label className="block text-sm font-medium">Piso</label>
+                            <select
+                                value={formData.floorId || 0}
+                                onChange={(e) => {
+                                    const selectedFloorId = parseInt(e.target.value);
+                                    const selectedFloor = floors.find(f => f.id === selectedFloorId);
+                                    if (selectedFloor) {
+                                        setFormData({
+                                            ...formData,
+                                            floorId: selectedFloor.id,
+                                            floor: {
+                                                id: selectedFloor.id,
+                                                identifier: selectedFloor.identifier,
+                                                bednumber: selectedFloor.bednumber
+                                            }
+                                        });
+                                        setErrors(prev => ({ ...prev, floor: undefined }));
+                                    }
+                                }}
                                 className="w-full p-3 border border-gray-300 rounded-lg"
-                            />
-                            {errors.fullName && <p className="text-red-500 text-sm">{errors.fullName}</p>}
+                            >
+                                <option value="0" disabled hidden>Seleccionar piso</option>
+                                {floors
+                                    .filter(floor => floor.occupied !== 1 || floor.id === (formData.floorId ?? 0))
+                                    .map(floor => (
+                                        <option key={floor.id} value={floor.id}>
+                                            {floor.identifier}
+                                        </option>
+                                ))}
+                            </select>
+                            {errors.floor && <p className="text-red-500 text-sm">{errors.floor}</p>}
                         </div>
-                        <div>
-                            <label className="block text-sm font-medium">Usuario</label>
-                            <input
-                                type="text"
-                                value={formData.username}
-                                onChange={(e) => handleChange("username", e.target.value)}
-                                className="w-full p-3 border border-gray-300 rounded-lg"
-                            />
-                            {errors.username && <p className="text-red-500 text-sm">{errors.username}</p>}
-                        </div>
-                        <div>
-                        <label className="block text-sm font-medium">Telefono</label>
-                            <input
-                                type="text"
-                                value={formData.phoneNumber}
-                                onChange={(e) => handleChange("phoneNumber", e.target.value)}
-                                maxLength={10}
-                                inputMode="numeric"
-                                pattern="\d*"
-                                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2"
-                            />
-                            {errors.phoneNumber && <p className="text-red-500 text-sm">{errors.phoneNumber}</p>}
-                        </div>
-                        <div>
-                            <label className="block text-sm font-medium">Correo</label>
-                            <input
-                                type="email"
-                                value={formData.email}
-                                onChange={(e) => handleChange("email", e.target.value)}
-                                className="w-full p-3 border border-gray-300 rounded-lg"
-                            />
-                            {errors.email && <p className="text-red-500 text-sm">{errors.email}</p>}
-                        </div>
+
                         {!isEdit && (
-                            <div>
+                            <div className="mt-4">
                                 <label className="block text-sm font-medium">Contraseña</label>
                                 <input
                                     type="password"

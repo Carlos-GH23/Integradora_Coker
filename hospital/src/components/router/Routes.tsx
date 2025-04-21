@@ -38,6 +38,7 @@ export const AnimatedRoutes = () => {
                     <Route path='secretarias' element={<ListSecretary/>}/>
                     <Route path='pisos' element={<ListFloor/>} />
                     <Route path='camas' element={<ListBeds/>} />
+                    <Route path='pacientes' element={<Tablepacients/>} />
                 </Route>
                 )}
 
