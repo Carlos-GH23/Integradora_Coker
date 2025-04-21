@@ -14,6 +14,8 @@ import ListSecretary from '../components/table-secretary';
 import ListFloor from '../components/table-floors';
 import ListBeds from '../components/table-beds';
 import { AiFillHome } from 'react-icons/ai';
+import ServerError from '../custom/ServerError';
+import NotFound from '../custom/NotFound';
 
 export const AnimatedRoutes = () => {
     const location = useLocation();
@@ -27,37 +29,38 @@ export const AnimatedRoutes = () => {
         <AnimatePresence mode="wait" className="min-h-screen w-full flex">
             <Routes location={location} key={location.pathname}>
 
-            <Route path="/" element={loggedIn ? <Navigate to={admin ? "/admin" : secretary ? "/secretaria" : nurse ? "/enfermera" : "/login"} /> : <Login />} />
+                <Route path="/" element={loggedIn ? <Navigate to={admin ? "/admin" : secretary ? "/secretaria" : nurse ? "/enfermera" : "/login"} /> : <Login />} />
 
                 <Route path="/login" element={<Login />} />
 
                 {admin && loggedIn && (
-                <Route path='/admin' element={<Admin/>} >
-                    <Route path='inicio' element={<AiFillHome/>}/>
-                    <Route path='enfermeras' element={<ListNurses/>}/>
-                    <Route path='secretarias' element={<ListSecretary/>}/>
-                    <Route path='pisos' element={<ListFloor/>} />
-                    <Route path='camas' element={<ListBeds/>} />
-                    <Route path='pacientes' element={<Tablepacients/>} />
-                </Route>
+                    <Route path='/admin' element={<Admin />} >
+                        <Route path='inicio' element={<AiFillHome />} />
+                        <Route path='enfermeras' element={<ListNurses />} />
+                        <Route path='secretarias' element={<ListSecretary />} />
+                        <Route path='pisos' element={<ListFloor />} />
+                        <Route path='camas' element={<ListBeds />} />
+                        <Route path='pacientes' element={<Tablepacients />} />
+                    </Route>
                 )}
 
                 {secretary && loggedIn && (
-                <Route path='/secretaria' element={<Secretary/>}>
-                    <Route path='inicio' element={<AiFillHome/>}/>
-                    <Route path='enfermeras' element={<ListNurses/>}/>
-                    <Route path='camas' element={<ListBeds/>} />                
-                </Route>
+                    <Route path='/secretaria' element={<Secretary />}>
+                        <Route path='inicio' element={<AiFillHome />} />
+                        <Route path='enfermeras' element={<ListNurses />} />
+                        <Route path='camas' element={<ListBeds />} />
+                    </Route>
                 )}
 
                 {nurse && loggedIn && (
-                <Route path="/enfermera" element={<Nurses />} >
-                    <Route path='inicio' element={<HomeNurses/>} />
-                    <Route path='pacientes' element={<Tablepacients/>} />
-                </Route>
+                    <Route path="/enfermera" element={<Nurses />} >
+                        <Route path='inicio' element={<HomeNurses />} />
+                        <Route path='pacientes' element={<Tablepacients />} />
+                    </Route>
                 )}
 
-
+                <Route path="/500" element={<ServerError />} />
+                <Route path="*" element={<NotFound />} />
 
             </Routes>
         </AnimatePresence>
