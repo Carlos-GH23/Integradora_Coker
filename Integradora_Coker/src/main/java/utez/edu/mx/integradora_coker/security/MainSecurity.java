@@ -3,6 +3,7 @@ package utez.edu.mx.integradora_coker.security;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.web.SecurityFilterChain;
@@ -41,12 +42,27 @@ public class MainSecurity implements WebMvcConfigurer {
         http.csrf(csrf -> csrf.disable()).cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(WHITE_LIST).permitAll()
-                        .requestMatchers("/api/users/create/**", "/api/bitacora", "/api/users/all", "/api/patients/**").hasRole("ADMIN")
-                        .requestMatchers("/api/users/assign-floor", "/api/users/unassign-floor/**").hasAnyRole("ADMIN", "SECRETARY")
-                        .requestMatchers("/api/patients/create", "/api/patients/edit/**").hasAnyRole("NURSE", "SECRETARY")
-                        .requestMatchers("/api/users/{id}").hasAnyRole("SECRETARY", "ADMIN")
-                        .requestMatchers("/api/floors/**", "/api/beds/**").hasAnyRole("ADMIN", "SECRETARY")
-                        .requestMatchers("/api/beds/assigned", "/api/patients/assign-bed", "/api/patients/unassign-bed/**").hasAnyRole("NURSE", "SECRETARY")
+
+                        .requestMatchers("/api/users/**").hasAnyRole("SECRETARY", "ADMIN")
+                        .requestMatchers( "/api/bitacora").hasRole("ADMIN")
+                        .requestMatchers("/api/floors/**").hasAnyRole("ADMIN", "SECRETARY")
+                        .requestMatchers("/api/beds/assigned").hasAnyRole("NURSE", "SECRETARY")
+                        .requestMatchers("/api/patients/assign-bed").hasAnyRole("NURSE", "SECRETARY")
+                        .requestMatchers("/api/patients/unassign-bed/**").hasAnyRole("NURSE", "SECRETARY")
+
+
+                        .requestMatchers(HttpMethod.GET, "/api/beds/**").hasAnyRole("SECRETARY", "NURSE")
+                        .requestMatchers(HttpMethod.POST, "/api/beds/**").hasRole("SECRETARY")
+                        .requestMatchers(HttpMethod.PUT, "/api/beds/**").hasRole("SECRETARY")
+                        .requestMatchers(HttpMethod.DELETE, "/api/beds/**").hasRole("SECRETARY")
+
+                        .requestMatchers(HttpMethod.GET, "/api/patients/**").hasRole("NURSE")
+                        .requestMatchers(HttpMethod.POST, "/api/patients/**").hasRole("NURSE")
+                        .requestMatchers(HttpMethod.PUT, "/api/patients/**").hasRole("NURSE")
+                        .requestMatchers(HttpMethod.DELETE, "/api/patients/**").hasRole("NURSE")
+
+
+                        .requestMatchers("/api/users/assign-floor", "/api/users/unassign-floor/**","/api/users/create/NURSE").hasAnyRole("ADMIN", "SECRETARY")
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(authFilter, UsernamePasswordAuthenticationFilter.class);
