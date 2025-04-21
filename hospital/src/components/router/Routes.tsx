@@ -16,6 +16,7 @@ import ListBeds from '../components/table-beds';
 import { AiFillHome } from 'react-icons/ai';
 import ServerError from '../custom/ServerError';
 import NotFound from '../custom/NotFound';
+import Bitacory from '../components/table-bitaciry';
 
 export const AnimatedRoutes = () => {
     const location = useLocation();
@@ -35,7 +36,7 @@ export const AnimatedRoutes = () => {
 
                 {admin && loggedIn && (
                     <Route path='/admin' element={<Admin />} >
-                        <Route path='inicio' element={<AiFillHome />} />
+                        <Route path='inicio' element={<Bitacory />} />
                         <Route path='enfermeras' element={<ListNurses />} />
                         <Route path='secretarias' element={<ListSecretary />} />
                         <Route path='pisos' element={<ListFloor />} />

@@ -16,6 +16,14 @@ export interface Floor {
     occupied?: number;
 }
 
+export interface LogEntry {
+    id: number;
+    usuario: string;
+    metodoHttp: string;
+    endpoint: string;
+    fechaHora: string;
+}
+
 export interface Patient {
     id: number;
     fullName: string;

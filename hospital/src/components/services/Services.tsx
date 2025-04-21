@@ -5,6 +5,7 @@ const API_B = "http://localhost:8080/api/beds"
 const API = "http://localhost:8080/api/floors"
 const API_URL = "http://localhost:8080/api/users/" 
 const API_P = "http://localhost:8080/api/patients"
+const API_A = "http://localhost:8080/api/bitacora"
 
 export class AdminServices<T> {
 
@@ -246,6 +247,17 @@ export class AdminServices<T> {
     async unassignBedPatient(id: number): Promise<T> {
         try {
             return axios.put(`${API_P}/unassign-bed/${id}`, null, this.getHeaders()).then(res => res.data);
+        } catch (error) {
+            console.error("Error al obtener los datos:", error);
+            throw error;
+        }
+    }
+
+    //Bitacora
+    async getBitacora() {
+        try {
+            const response = await axios.get(`${API_A}`, this.getHeaders());
+            return response;
         } catch (error) {
             console.error("Error al obtener los datos:", error);
             throw error;
