@@ -1,6 +1,8 @@
 package utez.edu.mx.integradora_coker.models.user;
 
 
+import utez.edu.mx.integradora_coker.models.floor.FloorBean;
+
 public class UserDto {
     private Long id;
     private String fullName;
@@ -9,6 +11,7 @@ public class UserDto {
     private String username;
     private String password;
     private String roleName;
+    private Long floorId;
 
     // Getters y Setters
     public Long getId() {
@@ -67,6 +70,14 @@ public class UserDto {
         this.roleName = roleName;
     }
 
+    public Long getFloorId() {
+        return floorId;
+    }
+
+    public void setFloorId(Long floorId) {
+        this.floorId = floorId;
+    }
+
     // Convertir de UserBean a UserDto
     public static UserDto fromEntity(UserBean user) {
         UserDto dto = new UserDto();
@@ -77,6 +88,9 @@ public class UserDto {
         dto.setUsername(user.getUsername());
         dto.setPassword(user.getPassword());
         dto.setRoleName(user.getRole().getName());
+        if (user.getFloor() != null) {
+            dto.setFloorId(user.getFloor().getId());
+        }
         return dto;
     }
 
@@ -89,6 +103,11 @@ public class UserDto {
         user.setPhoneNumber(this.phoneNumber);
         user.setUsername(this.username);
         user.setPassword(this.password);
+        if (this.floorId != null) {
+            FloorBean floor = new FloorBean();
+            floor.setId(this.floorId);
+            user.setFloor(floor);
+        }
         return user;
     }
 }
