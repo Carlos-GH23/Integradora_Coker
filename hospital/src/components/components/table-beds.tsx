@@ -14,7 +14,7 @@ DataTable.use(DT);
 const ListBeds = () => {
     const [loading, setLoading] = useState(true);
     const [beds, setbeds] = useState<Bed[]>([]);
-    const [formData, setFormData] = useState<Bed>({ id: 0, identifier: "", floor: { id: 0, identifier: "", bednumber: 0 }, user: { id: 0, fullName: "", email: "", phoneNumber: "", username: "", password: "", floor: {id: 0, identifier: "", bednumber: 0} }, patient: { id: 0, fullName: "" } });
+    const [formData, setFormData] = useState<Bed>({ id: 0, identifier: "", floor: { id: 0, identifier: "", bednumber: 0 }, user: { id: 0, fullName: "", email: "", phoneNumber: "", username: "", password: "", floor: {id: 0, identifier: "", bednumber: 0} }, occupied: false  });
     
     const [viewModalForm, setViewModalForm] = useState(false);
     const [selectedBed, setSelectedBed] = useState<Bed | null>(null);
@@ -222,6 +222,7 @@ const ListBeds = () => {
                             <th className="px-6 py-3">Nombre</th>
                             <th className="px-6 py-3">Enfermera</th>
                             <th className="px-6 py-3">Piso</th>
+                            <th className="px-6 py-3">Estado</th>
                             <th className="px-6 py-3">Acciones</th>
                         </tr>
                     </thead>
@@ -232,6 +233,7 @@ const ListBeds = () => {
                                 <td className="px-6 py-4">{bed.identifier}</td>
                                 <td className="px-6 py-4">{bed.user?.fullName ?? "Sin asignar"}</td>
                                 <td className="px-6 py-4">{bed.floor?.identifier}</td>
+                                <td className="px-6 py-4">{bed.occupied ? "Ocupada" : "Disponible"}</td>
                                 {isSecretary() || isAdmin() && (
                                     <td className="px-6 py-4 flex space-x-2">
                                         <button className="w-10 h-10 flex items-center justify-center bg-blue-500 text-white rounded-full hover:bg-blue-600 transition cursor-pointer"
@@ -265,7 +267,7 @@ const ListBeds = () => {
 
             <button className="fixed bottom-6 right-6 bg-green-600 text-white p-4 rounded-full shadow-lg hover:bg-green-700 transition"
                 onClick={() => {
-                    setFormData({ id: 0, identifier: "", floor: { id: 0, identifier: "", bednumber: 0 }, user: { id: 0, fullName: "", email: "", phoneNumber: "", username: "", password: "", floor: {id: 0, identifier: "", bednumber: 0} }, patient: { id: 0, fullName: "" } });
+                    setFormData({ id: 0, identifier: "", floor: { id: 0, identifier: "", bednumber: 0 }, user: { id: 0, fullName: "", email: "", phoneNumber: "", username: "", password: "", floor: {id: 0, identifier: "", bednumber: 0} }, occupied: false });
                     toggleModalForm();
                 }}
             >
@@ -336,7 +338,7 @@ const ListBeds = () => {
                         <div>
                             <label className="block text-sm font-medium">Piso asignado</label>
                             <select
-                                value={formData.user.floorId || 0}
+                                value={formData.user?.floorId || 0}
                                 onChange={(e) => {
                                     const selectedFloorId = parseInt(e.target.value);
                                     const selectedFloor = floors.find(f => f.id === selectedFloorId);

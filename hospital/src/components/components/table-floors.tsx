@@ -146,6 +146,7 @@ const ListFloor = () => {
                             <th className="px-6 py-3">ID</th>
                             <th className="px-6 py-3">Piso</th>
                             <th className="px-6 py-3">Número de Camas</th>
+                            <th className="px-6 py-3">Estado</th>
                             {isAdmin() && <th className="px-6 py-3">Acciones</th>}
                         </tr>
                     </thead>
@@ -156,6 +157,7 @@ const ListFloor = () => {
                                 <td className="px-6 py-4">{Floor.id}</td>
                                 <td className="px-6 py-4">{Floor.identifier}</td>
                                 <td className="px-6 py-4">{Floor.bednumber}</td>
+                                <td className="px-6 py-4">{Floor.occupied === 1 ? "Activo" : "Inactivo"}</td>
                                 {isAdmin() && (
                                     <td className="px-6 py-4 flex space-x-2">
                                         <button 

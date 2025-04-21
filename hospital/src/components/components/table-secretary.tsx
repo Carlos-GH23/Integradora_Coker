@@ -27,7 +27,8 @@ const ListSecretary = () => {
     const [floors, setfloors] = useState<Floor[]>([]);
     const [errors, setErrors] = useState<{ fullName?: string; email?: string; phoneNumber?: string; username?: string; password?: string, floor?: string}>({});
     
-    const isEdit = formData.id !== 0;  
+    const isEdit = formData.id !== 0;
+    const [originalFloor, setOriginalFloor] = useState<Number | null>(null);
 
     const fetchsecretarys = async () => {
         setLoading(true);
@@ -123,15 +124,27 @@ const ListSecretary = () => {
                 },
             };
             if (!isEdit) {
-                await Service.createSecretary(editNewNurse as User);
+                const createdResponse = await Service.createSecretary(editNewNurse as User);
+                await Service.floorSecretary({
+                    userId: createdResponse.id,
+                    floorId: formData.floorId,
+                });
             } else {
+                if (originalFloor && originalFloor != 0 && originalFloor !== formData.floorId) {
+                    await Service.unassignFloorSecretary(formData.id);
+                    await Service.floorSecretary({
+                        userId: formData.id,
+                        floorId: formData.floorId,
+                    });
+                }
+                if (!originalFloor) {
+                    await Service.floorSecretary({
+                        userId: formData.id,
+                        floorId: formData.floorId,
+                    });
+                }
                 await Service.updateSecretary(formData.id, editNewNurse as User);
             }
-            const asignFloor = {
-                userId: formData.id,
-                floorId: formData.floor.id,
-            };
-            await Service.floorSecretary(asignFloor)
             setSuccessMessage(isEdit ? "Secretaria(o) editada exitosamente" : "Secretaria(o) creada exitosamente");
             setAlertMessage(false);
             toggleModalForm();
@@ -151,6 +164,7 @@ const ListSecretary = () => {
         setErrorMessage("");
         try {
             if (selectedSecretary) {
+                await Service.unassignFloorSecretary(selectedSecretary.id);
                 await Service.deleteSecretary(selectedSecretary.id)
                 setSuccessMessage("Eliminación exitosamente");
                 fetchsecretarys();
@@ -231,7 +245,7 @@ const ListSecretary = () => {
 
                                 <td className="px-6 py-4 flex space-x-2">
                                     <button className="w-10 h-10 flex items-center justify-center bg-blue-500 text-white rounded-full hover:bg-blue-600 transition cursor-pointer"
-                                        onClick={() => { setFormData(secretary); toggleModalForm(); }}>
+                                        onClick={() => { setFormData(secretary); setOriginalFloor(secretary.floorId ?? 0); toggleModalForm(); }}>
                                         <FaPen size={18} />
                                     </button>
                                     <button
