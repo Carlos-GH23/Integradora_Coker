@@ -19,14 +19,16 @@ export interface Floor {
 export interface Patient {
     id: number;
     fullName: string;
+    bed: Bed;
 }
 
 export interface Bed {
     id: number;
     identifier: string;
     floor: Floor;
-    user: User;
-    patient: Patient;
+    user?: User;
+    patient?: Patient;
+    occupied: boolean;
 }
 
 

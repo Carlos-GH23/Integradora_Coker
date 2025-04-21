@@ -1,9 +1,10 @@
 import axios from "axios";
-import { Bed, Floor, User } from "../models/UserModels";
+import { Bed, Floor, Patient, User } from "../models/UserModels";
 
 const API_B = "http://localhost:8080/api/beds"
 const API = "http://localhost:8080/api/floors"
 const API_URL = "http://localhost:8080/api/users/" 
+const API_P = "http://localhost:8080/api/patients"
 
 export class AdminServices<T> {
 
@@ -29,7 +30,7 @@ export class AdminServices<T> {
             console.error("Error al obtener los datos:", error);
             throw error;
         }
-    }//EXITO
+    }
 
     async createNurse(data: T): Promise<T> {
         try {
@@ -38,7 +39,7 @@ export class AdminServices<T> {
             console.error("Error al obtener los datos:", error);
             throw error;
         }
-    }//EXITO
+    }
 
     async deleteNurse(id: number): Promise<void> {
         try {
@@ -47,7 +48,7 @@ export class AdminServices<T> {
             console.error("Error al obtener los datos:", error);
             throw error;
         }
-    }//EXITO
+    }
 
     async updateNurse(id: number, data: Partial<T>): Promise<T> {
         try {
@@ -56,7 +57,7 @@ export class AdminServices<T> {
             console.error("Error al obtener los datos:", error);
             throw error;
         }
-    }//EXITO
+    }
 
     async floorNurse(data: any): Promise<T> {
         try {
@@ -75,16 +76,16 @@ export class AdminServices<T> {
             console.error("Error al obtener los datos:", error);
             throw error;
         }
-    }//EXITO
+    }
 
     async createSecretary(data: T): Promise<T> {
         try {
-            return axios.post(`${API_URL}create/SECRETARY`,data, this.getHeaders()).then(res => res.data);
+            return axios.post(`${API_URL}create/SECRETARY`,data, this.getHeaders()).then(res => res.data.data);
         } catch (error) {
             console.error("Error al obtener los datos:", error);
             throw error;
         }
-    }//EXITO
+    }
 
     async deleteSecretary(id: number): Promise<void> {
         try {
@@ -93,7 +94,7 @@ export class AdminServices<T> {
             console.error("Error al obtener los datos:", error);
             throw error;
         }
-    }//EXITO
+    }
 
     async updateSecretary(id: number, data: Partial<T>): Promise<T> {
         try {
@@ -102,7 +103,7 @@ export class AdminServices<T> {
             console.error("Error al obtener los datos:", error);
             throw error;
         }
-    }//EXITO
+    }
 
     async floorSecretary(data: any): Promise<T> {
         try {
@@ -111,7 +112,16 @@ export class AdminServices<T> {
             console.error("Error al obtener los datos:", error);
             throw error;
         }
-    }//EXITO
+    }
+
+    async unassignFloorSecretary(id: number): Promise<T> {
+        try {
+            return axios.delete(`${API_URL}unassign-floor/${id}`, this.getHeaders()).then(res => res.data);
+        } catch (error) {
+            console.error("Error al obtener los datos:", error);
+            throw error;
+        }
+    }
 
     //PISOS
     async getAllFloor(): Promise<{data: Floor[]}> {
@@ -121,7 +131,7 @@ export class AdminServices<T> {
             console.error("Error al obtener los datos:", error);
             throw error;
         }
-    }//EXITO
+    }
 
     async createFloor(data: T): Promise<T> {
         try {
@@ -130,7 +140,7 @@ export class AdminServices<T> {
             console.error("Error al obtener los datos:", error);
             throw error;
         }
-    }//EXITO
+    }
 
     async deleteFloor(id: number): Promise<void> {
         try {
@@ -139,7 +149,7 @@ export class AdminServices<T> {
             console.error("Error al obtener los datos:", error);
             throw error;
         }
-    }//EXITO
+    }
 
     async updateFloor(id: number, data: Partial<T>): Promise<T> {
         try {
@@ -148,7 +158,7 @@ export class AdminServices<T> {
             console.error("Error al obtener los datos:", error);
             throw error;
         }
-    }//EXITO
+    }
 
     //CAMAS
     async getAllBeds(): Promise<{data: Bed[]}> {
@@ -188,6 +198,58 @@ export class AdminServices<T> {
     }
 
     //PACIENTES
-    
+    async getAllPatients(): Promise<{data: Patient[]}> {
+        try {
+            return axios.get<{ data: Patient[] }>(`${API_P}`, this.getHeaders()).then(res => res.data);
+        } catch (error) {
+            console.error("Error al obtener los datos:", error);
+            throw error;
+        }
+    }
+
+    async createPatient(data: T): Promise<T> {
+        try {
+            return axios.post(`${API_P}/create`,data, this.getHeaders()).then(res => res.data.data);
+        } catch (error) {
+            console.error("Error al obtener los datos:", error);
+            throw error;
+        }
+    }
+
+    async updatePatient(id: number, data: Partial<T>): Promise<T> {
+        try {
+            return axios.put(`${API_P}/edit/${id}`,data, this.getHeaders()).then(res => res.data);
+        } catch (error) {
+            console.error("Error al obtener los datos:", error);
+            throw error;
+        }
+    }
+
+    async deletePatient(id: number): Promise<void> {
+        try {
+            return axios.delete(`${API_P}/delete/${id}`, this.getHeaders()).then(res => res.data);
+        } catch (error) {
+            console.error("Error al obtener los datos:", error);
+            throw error;
+        }
+    }
+
+    async assignBedPatient(data: any): Promise<T> {
+        try {
+            return axios.put(`${API_P}/assign-bed`,data, this.getHeaders()).then(res => res.data);
+        } catch (error) {
+            console.error("Error al obtener los datos:", error);
+            throw error;
+        }
+    }
+
+    async unassignBedPatient(id: number): Promise<T> {
+        try {
+            return axios.put(`${API_P}/unassign-bed/${id}`, null, this.getHeaders()).then(res => res.data);
+        } catch (error) {
+            console.error("Error al obtener los datos:", error);
+            throw error;
+        }
+    }
 }
 
